@@ -26,24 +26,39 @@ class QiblaView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Transform.rotate(
-                      angle: (qiblahDirection.direction * (math.pi / 180) * -1),
-                      child: const Icon(Icons.compass_calibration, size: 250, color: Colors.grey),
-                    ),
-                    Transform.rotate(
-                      angle: (qiblahDirection.qiblah * (math.pi / 180) * -1),
-                      child: const Icon(Icons.navigation, size: 150, color: Colors.green),
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.green, width: 4),
+                    boxShadow: [
+                      BoxShadow(color: Colors.green.withValues(alpha: 0.2), blurRadius: 20, spreadRadius: 10),
+                    ],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Transform.rotate(
+                        angle: (qiblahDirection.direction * (math.pi / 180) * -1),
+                        child: Image.asset('assets/images/Logo.png', width: 200, opacity: const AlwaysStoppedAnimation(0.1)),
+                      ),
+                      Transform.rotate(
+                        angle: (qiblahDirection.direction * (math.pi / 180) * -1),
+                        child: const Icon(Icons.compass_calibration, size: 250, color: Colors.grey),
+                      ),
+                      Transform.rotate(
+                        angle: (qiblahDirection.qiblah * (math.pi / 180) * -1),
+                        child: const Icon(Icons.navigation, size: 150, color: Colors.green),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Text(
                   'زاوية القبلة: ${qiblahDirection.offset.toStringAsFixed(2)}°',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
                 ),
+                const Text('قم بتدوير الهاتف حتى يشير السهم الأخضر للأعلى', style: TextStyle(fontSize: 14, color: Colors.grey)),
               ],
             ),
           );

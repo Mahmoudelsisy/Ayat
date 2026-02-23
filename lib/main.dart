@@ -61,6 +61,11 @@ class AyatApp extends ConsumerWidget {
 final downloadProgressProvider = StateProvider<double>((ref) => 0.0);
 final isDownloadingProvider = StateProvider<bool>((ref) => false);
 final isAppLockedProvider = StateProvider<bool>((ref) => false);
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final isDark = prefs.getBool('is_dark') ?? false;
+  return isDark ? ThemeMode.dark : ThemeMode.light;
+});
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});

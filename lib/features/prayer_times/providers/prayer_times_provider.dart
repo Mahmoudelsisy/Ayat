@@ -49,6 +49,10 @@ class PrayerTimesService {
     final notificationService = NotificationService();
     await notificationService.cancelAll();
 
+    // Azkar Reminders
+    await notificationService.scheduleDailyNotification(100, 'أذكار الصباح', 'حان الآن موعد أذكار الصباح', 7, 0);
+    await notificationService.scheduleDailyNotification(101, 'أذكار المساء', 'حان الآن موعد أذكار المساء', 17, 0);
+
     final prayers = {
       'الفجر': times.fajr,
       'الظهر': times.dhuhr,

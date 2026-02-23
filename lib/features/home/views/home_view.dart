@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import 'package:drift/drift.dart' as drift hide Column;
 import 'package:hijri/hijri_calendar.dart';
 import '../../quran/views/surah_detail_screen.dart';
+import '../../prayer_times/providers/prayer_times_provider.dart';
 import '../../modes/views/modes_screen.dart';
 import '../../bookmarks/views/bookmarks_screen.dart';
 import '../../stats/views/stats_screen.dart';
+import '../../calendar/views/calendar_screen.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -16,11 +19,75 @@ final readAyahsCountProvider = FutureProvider<int>((ref) async {
   return result.read(countExp) ?? 0;
 });
 
-class HomeView extends ConsumerWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends ConsumerState<HomeView> {
+  Timer? _timer;
+  Duration _timeLeft = Duration.zero;
+  String _nextPrayerName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _calculateCountdown();
+    });
+  }
+
+  void _calculateCountdown() {
+    final prayerTimesAsync = ref.read(prayerTimesProvider);
+    prayerTimesAsync.whenData((times) {
+      final now = DateTime.now();
+      final next = times.nextPrayer();
+
+      final nextTime = times.timeForPrayer(next);
+      if (nextTime != null) {
+        if (mounted) {
+          setState(() {
+            _timeLeft = nextTime.difference(now);
+            _nextPrayerName = _getPrayerNameArabic(next);
+          });
+        }
+      }
+    });
+  }
+
+  String _getPrayerNameArabic(dynamic prayer) {
+    // Adhan package uses enum
+    switch (prayer.toString()) {
+      case 'Prayer.fajr': return 'الفجر';
+      case 'Prayer.dhuhr': return 'الظهر';
+      case 'Prayer.asr': return 'العصر';
+      case 'Prayer.maghrib': return 'المغرب';
+      case 'Prayer.isha': return 'العشاء';
+      default: return 'الصلاة القادمة';
+    }
+  }
+
+  String _formatDuration(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes % 60;
+    final s = d.inSeconds % 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final readCountAsync = ref.watch(readAyahsCountProvider);
     const totalAyahs = 6236;
 
@@ -33,6 +100,8 @@ class HomeView extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (_nextPrayerName.isNotEmpty) _buildCountdownCard(),
+          const SizedBox(height: 20),
           if (lastSurahNum != null) ...[
             _buildLastReadCard(context, lastSurahNum, lastSurahName!),
             const SizedBox(height: 20),
@@ -68,6 +137,7 @@ class HomeView extends ConsumerWidget {
           _buildRamadanCountdown(),
           const SizedBox(height: 20),
           _buildQuickAction(context, 'الإحصائيات والتقدم', Icons.bar_chart, Colors.blue, destination: const StatsScreen()),
+          _buildQuickAction(context, 'التقويم الهجري والمناسبات', Icons.calendar_today, Colors.teal, destination: const CalendarScreen()),
           _buildQuickAction(context, 'المرجعيات', Icons.bookmark, Colors.red, destination: const BookmarksScreen()),
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),
@@ -134,6 +204,25 @@ class HomeView extends ConsumerWidget {
         Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
+    );
+  }
+
+  Widget _buildCountdownCard() {
+    return Card(
+      color: Colors.blueGrey[900],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('الوقت المتبقي لصلاة $_nextPrayerName', style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            const SizedBox(height: 10),
+            Text(
+              _formatDuration(_timeLeft),
+              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 2),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

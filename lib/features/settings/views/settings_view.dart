@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../main.dart';
 
-class SettingsView extends StatelessWidget {
+class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('الإعدادات')),
       body: ListView(
@@ -23,8 +27,12 @@ class SettingsView extends StatelessWidget {
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode),
             title: const Text('الوضع الليلي'),
-            value: false,
-            onChanged: (val) {},
+            value: themeMode == ThemeMode.dark,
+            onChanged: (val) {
+              final prefs = ref.read(sharedPreferencesProvider);
+              prefs.setBool('is_dark', val);
+              ref.read(themeModeProvider.notifier).state = val ? ThemeMode.dark : ThemeMode.light;
+            },
           ),
           ListTile(
             leading: const Icon(Icons.language),
