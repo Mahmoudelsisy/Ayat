@@ -66,38 +66,73 @@ class _KhatmaPlannerScreenState extends ConsumerState<KhatmaPlannerScreen> {
   }
 
   Widget _buildActivePlanView(KhatmaPlan plan) {
-    final daysPassed = DateTime.now().difference(plan.startDate).inDays;
+    final now = DateTime.now();
+    final daysPassed = now.difference(plan.startDate).inDays + 1;
     final progress = plan.progressAyahs / 6236;
-    final dailyGoal = 6236 / plan.targetDays;
+    final remainingAyahs = 6236 - plan.progressAyahs;
+    final remainingDays = plan.targetDays - daysPassed;
+    final dailyGoal = remainingDays > 0 ? remainingAyahs / remainingDays : remainingAyahs.toDouble();
+
+    // Mushaf pages is ~604
+    final remainingPages = (remainingAyahs / 6236) * 604;
+    final pagesPerDay = remainingDays > 0 ? remainingPages / remainingDays : remainingPages;
+
+    final predictedEnd = now.add(Duration(days: remainingDays > 0 ? remainingDays : 1));
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: Column(
+      child: ListView(
         children: [
-          Text(plan.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(plan.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
-          SizedBox(
-            width: 150, height: 150,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                CircularProgressIndicator(value: progress, strokeWidth: 12),
-                Center(child: Text('${(progress * 100).toInt()}%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-              ],
+          Center(
+            child: SizedBox(
+              width: 180, height: 180,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CircularProgressIndicator(value: progress, strokeWidth: 12, backgroundColor: Colors.grey[200]),
+                  Center(child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('${(progress * 100).toInt()}%', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                      const Text('مكتمل', style: TextStyle(color: Colors.grey)),
+                    ],
+                  )),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 30),
-          _buildInfoRow('تاريخ البدء', plan.startDate.toString().split(' ')[0]),
-          _buildInfoRow('المدة الكلية', '${plan.targetDays} يوم'),
-          _buildInfoRow('الأيام المنقضية', '$daysPassed يوم'),
-          _buildInfoRow('الهدف اليومي', '${dailyGoal.toInt()} آية'),
-          const Spacer(),
+          _buildInfoCard([
+            _buildInfoRow('تاريخ البدء', plan.startDate.toString().split(' ')[0]),
+            _buildInfoRow('تاريخ الانتهاء المتوقع', predictedEnd.toString().split(' ')[0]),
+            _buildInfoRow('الأيام المتبقية', '${remainingDays > 0 ? remainingDays : 0} يوم'),
+          ]),
+          const SizedBox(height: 16),
+          _buildInfoCard([
+            _buildInfoRow('الآيات المتبقية', '$remainingAyahs آية'),
+            _buildInfoRow('الهدف اليومي (آيات)', '${dailyGoal.ceil()} آية'),
+            _buildInfoRow('الهدف اليومي (صفحات)', '${pagesPerDay.toStringAsFixed(1)} صفحة'),
+          ]),
+          const SizedBox(height: 40),
           ElevatedButton(
             onPressed: _finishPlan,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, padding: const EdgeInsets.all(16)),
             child: const Text('إنهاء الختمة الحالية'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(List<Widget> children) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(children: children),
       ),
     );
   }

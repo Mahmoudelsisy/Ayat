@@ -189,6 +189,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
           const SizedBox(height: 20),
           _buildDuaOfDay(ref),
           const SizedBox(height: 20),
+          _buildSpiritualChecklist(),
+          const SizedBox(height: 20),
           _buildCommitmentStats(),
           const SizedBox(height: 20),
           Card(
@@ -412,6 +414,48 @@ class _HomeViewState extends ConsumerState<HomeView> {
               loading: () => const CircularProgressIndicator(),
               error: (err, stack) => const Text('الحمد لله رب العالمين'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpiritualChecklist() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    final items = [
+      {'key': 'checklist_duha', 'label': 'صلاة الضحى'},
+      {'key': 'checklist_witr', 'label': 'صلاة الوتر'},
+      {'key': 'checklist_kahf', 'label': 'سورة الكهف (الجمعة)', 'only_friday': true},
+      {'key': 'checklist_charity', 'label': 'صدقة اليوم'},
+    ];
+
+    final isFriday = DateTime.now().weekday == DateTime.friday;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('قائمة السنن والآداب', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            ...items.where((i) => i['only_friday'] != true || isFriday).map((item) {
+              final key = '${item['key']}_$today';
+              final isDone = prefs.getBool(key) ?? false;
+              return CheckboxListTile(
+                title: Text(item['label'] as String),
+                value: isDone,
+                onChanged: (val) {
+                  prefs.setBool(key, val ?? false);
+                  setState(() {});
+                },
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              );
+            }),
           ],
         ),
       ),
