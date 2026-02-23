@@ -50,7 +50,13 @@ class Bookmarks extends Table {
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks])
+class AllahNames extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get meaning => text()();
+}
+
+@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

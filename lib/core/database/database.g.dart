@@ -1891,6 +1891,254 @@ class BookmarksCompanion extends UpdateCompanion<Bookmark> {
   }
 }
 
+class $AllahNamesTable extends AllahNames
+    with TableInfo<$AllahNamesTable, AllahName> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AllahNamesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _meaningMeta = const VerificationMeta(
+    'meaning',
+  );
+  @override
+  late final GeneratedColumn<String> meaning = GeneratedColumn<String>(
+    'meaning',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, meaning];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'allah_names';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AllahName> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('meaning')) {
+      context.handle(
+        _meaningMeta,
+        meaning.isAcceptableOrUnknown(data['meaning']!, _meaningMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_meaningMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AllahName map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AllahName(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      meaning: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meaning'],
+      )!,
+    );
+  }
+
+  @override
+  $AllahNamesTable createAlias(String alias) {
+    return $AllahNamesTable(attachedDatabase, alias);
+  }
+}
+
+class AllahName extends DataClass implements Insertable<AllahName> {
+  final int id;
+  final String name;
+  final String meaning;
+  const AllahName({
+    required this.id,
+    required this.name,
+    required this.meaning,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['meaning'] = Variable<String>(meaning);
+    return map;
+  }
+
+  AllahNamesCompanion toCompanion(bool nullToAbsent) {
+    return AllahNamesCompanion(
+      id: Value(id),
+      name: Value(name),
+      meaning: Value(meaning),
+    );
+  }
+
+  factory AllahName.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AllahName(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      meaning: serializer.fromJson<String>(json['meaning']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'meaning': serializer.toJson<String>(meaning),
+    };
+  }
+
+  AllahName copyWith({int? id, String? name, String? meaning}) => AllahName(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    meaning: meaning ?? this.meaning,
+  );
+  AllahName copyWithCompanion(AllahNamesCompanion data) {
+    return AllahName(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      meaning: data.meaning.present ? data.meaning.value : this.meaning,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AllahName(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('meaning: $meaning')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, meaning);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AllahName &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.meaning == this.meaning);
+}
+
+class AllahNamesCompanion extends UpdateCompanion<AllahName> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> meaning;
+  const AllahNamesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.meaning = const Value.absent(),
+  });
+  AllahNamesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String meaning,
+  }) : name = Value(name),
+       meaning = Value(meaning);
+  static Insertable<AllahName> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? meaning,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (meaning != null) 'meaning': meaning,
+    });
+  }
+
+  AllahNamesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? meaning,
+  }) {
+    return AllahNamesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      meaning: meaning ?? this.meaning,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (meaning.present) {
+      map['meaning'] = Variable<String>(meaning.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AllahNamesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('meaning: $meaning')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1899,6 +2147,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AzkarTable azkar = $AzkarTable(this);
   late final $UserProgressTable userProgress = $UserProgressTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
+  late final $AllahNamesTable allahNames = $AllahNamesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1909,6 +2158,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     azkar,
     userProgress,
     bookmarks,
+    allahNames,
   ];
 }
 
@@ -2916,6 +3166,155 @@ typedef $$BookmarksTableProcessedTableManager =
       Bookmark,
       PrefetchHooks Function()
     >;
+typedef $$AllahNamesTableCreateCompanionBuilder =
+    AllahNamesCompanion Function({
+      Value<int> id,
+      required String name,
+      required String meaning,
+    });
+typedef $$AllahNamesTableUpdateCompanionBuilder =
+    AllahNamesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> meaning,
+    });
+
+class $$AllahNamesTableFilterComposer
+    extends Composer<_$AppDatabase, $AllahNamesTable> {
+  $$AllahNamesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get meaning => $composableBuilder(
+    column: $table.meaning,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AllahNamesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AllahNamesTable> {
+  $$AllahNamesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get meaning => $composableBuilder(
+    column: $table.meaning,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AllahNamesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AllahNamesTable> {
+  $$AllahNamesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get meaning =>
+      $composableBuilder(column: $table.meaning, builder: (column) => column);
+}
+
+class $$AllahNamesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AllahNamesTable,
+          AllahName,
+          $$AllahNamesTableFilterComposer,
+          $$AllahNamesTableOrderingComposer,
+          $$AllahNamesTableAnnotationComposer,
+          $$AllahNamesTableCreateCompanionBuilder,
+          $$AllahNamesTableUpdateCompanionBuilder,
+          (
+            AllahName,
+            BaseReferences<_$AppDatabase, $AllahNamesTable, AllahName>,
+          ),
+          AllahName,
+          PrefetchHooks Function()
+        > {
+  $$AllahNamesTableTableManager(_$AppDatabase db, $AllahNamesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AllahNamesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AllahNamesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AllahNamesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> meaning = const Value.absent(),
+              }) => AllahNamesCompanion(id: id, name: name, meaning: meaning),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String meaning,
+              }) => AllahNamesCompanion.insert(
+                id: id,
+                name: name,
+                meaning: meaning,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AllahNamesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AllahNamesTable,
+      AllahName,
+      $$AllahNamesTableFilterComposer,
+      $$AllahNamesTableOrderingComposer,
+      $$AllahNamesTableAnnotationComposer,
+      $$AllahNamesTableCreateCompanionBuilder,
+      $$AllahNamesTableUpdateCompanionBuilder,
+      (AllahName, BaseReferences<_$AppDatabase, $AllahNamesTable, AllahName>),
+      AllahName,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2930,4 +3329,6 @@ class $AppDatabaseManager {
       $$UserProgressTableTableManager(_db, _db.userProgress);
   $$BookmarksTableTableManager get bookmarks =>
       $$BookmarksTableTableManager(_db, _db.bookmarks);
+  $$AllahNamesTableTableManager get allahNames =>
+      $$AllahNamesTableTableManager(_db, _db.allahNames);
 }

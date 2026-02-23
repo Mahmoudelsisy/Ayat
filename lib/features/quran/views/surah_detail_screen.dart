@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:drift/drift.dart' hide Column;
+import 'package:share_plus/share_plus.dart';
 import '../../../main.dart';
 import '../../../core/database/database.dart';
 import '../../tafsir/providers/tafsir_provider.dart';
@@ -337,6 +338,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.share),
+                                    onPressed: () {
+                                      Share.share('${ayah.verseText}\n[سورة ${ayah.surahNumber} - آية ${ayah.ayahNumber}]');
+                                    },
+                                  ),
                                   IconButton(
                                     icon: const Icon(Icons.bookmark_border),
                                     onPressed: () async {

@@ -12,7 +12,8 @@ class DataDownloadService {
     await downloadQuran(onProgress);
     await downloadTafsir("al_sa'dy.json", 'saadi', (p) => onProgress(0.7 + (p * 0.1)));
     await downloadTafsir("ebn_katheer.json", 'ibn_kathir', (p) => onProgress(0.8 + (p * 0.1)));
-    await downloadAzkar((p) => onProgress(0.9 + (p * 0.1)));
+    await downloadAzkar((p) => onProgress(0.9 + (p * 0.05)));
+    await downloadAllahNames((p) => onProgress(0.95 + (p * 0.05)));
   }
 
   Future<void> downloadQuran(Function(double) onProgress) async {
@@ -72,6 +73,26 @@ class DataDownloadService {
         });
         onProgress(end / data.length);
       }
+    }
+  }
+
+  Future<void> downloadAllahNames(Function(double) onProgress) async {
+    final count = await (db.select(db.allahNames)..limit(1)).get();
+    if (count.isNotEmpty) return;
+
+    final response = await http.get(Uri.parse('https://raw.githubusercontent.com/m4hmoud-atef/Islamic-and-quran-data/main/99_allah_names/allah_names_ar.json'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as List;
+      await db.batch((batch) {
+        batch.insertAll(db.allahNames, [
+          for (var item in data)
+            AllahNamesCompanion.insert(
+              name: item['name'] as String,
+              meaning: item['text'] as String,
+            )
+        ]);
+      });
+      onProgress(1.0);
     }
   }
 
