@@ -52,10 +52,15 @@ LazyDatabase _openConnection() {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
 
-
     final cachebase = await getTemporaryDirectory();
     sqlite3.tempDirectory = cachebase.path;
 
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(
+      file,
+      setup: (db) {
+        // In a real app, use a key from Secure Storage
+        // db.execute("PRAGMA key = 'my_secure_key'");
+      },
+    );
   });
 }

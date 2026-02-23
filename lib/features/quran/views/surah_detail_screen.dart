@@ -241,15 +241,32 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     expand: false,
                     builder: (context, scrollController) => Consumer(
                       builder: (context, ref, child) {
-                        final tafsirAsync = ref.watch(tafsirProvider(TafsirParams(ayah.surahNumber, ayah.ayahNumber)));
+                        final type = ref.watch(selectedTafsirTypeProvider);
+                        final tafsirAsync = ref.watch(tafsirProvider(TafsirParams(ayah.surahNumber, ayah.ayahNumber, type: type)));
                         return Container(
                           padding: const EdgeInsets.all(16),
                           child: ListView(
                             controller: scrollController,
                             children: [
-                              Text('تفسير الآية ${ayah.ayahNumber}',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('تفسير الآية ${ayah.ayahNumber}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                                  DropdownButton<String>(
+                                    value: type,
+                                    items: const [
+                                      DropdownMenuItem(value: 'saadi', child: Text('السعدي')),
+                                      DropdownMenuItem(value: 'ibn_kathir', child: Text('ابن كثير')),
+                                    ],
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        ref.read(selectedTafsirTypeProvider.notifier).state = val;
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                               const SizedBox(height: 20),
                               tafsirAsync.when(
                                 data: (data) => Text(

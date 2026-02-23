@@ -50,6 +50,10 @@ dependencies:
   intl: any
   font_awesome_flutter: any
   sqlite3: any
+  flutter_local_notifications: ^17.2.2
+  timezone: ^0.9.4
+  flutter_timezone: ^2.0.0
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

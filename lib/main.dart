@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'shared/themes/app_theme.dart';
 import 'core/database/database.dart';
 import 'core/services/data_download_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/auth_service.dart';
 import 'features/home/views/main_screen.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -12,8 +14,9 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   runApp(
     const ProviderScope(
       child: AyatApp(),
@@ -48,6 +51,7 @@ class AyatApp extends ConsumerWidget {
 
 final downloadProgressProvider = StateProvider<double>((ref) => 0.0);
 final isDownloadingProvider = StateProvider<bool>((ref) => false);
+final isAppLockedProvider = StateProvider<bool>((ref) => false);
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -64,6 +68,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _checkData() async {
+    // Auth Check
+    final isLocked = ref.read(isAppLockedProvider);
+    if (isLocked) {
+      final authService = ref.read(authServiceProvider);
+      final authenticated = await authService.authenticate();
+      if (!authenticated) {
+        // App remains locked or exits
+        return;
+      }
+    }
+
     final db = ref.read(databaseProvider);
     final quranCount = await (db.select(db.quran)..limit(1)).get();
 

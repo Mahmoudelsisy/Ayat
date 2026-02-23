@@ -1,10 +1,13 @@
 import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/notification_service.dart';
 
 final prayerTimesProvider = FutureProvider<PrayerTimes>((ref) async {
   final service = PrayerTimesService();
-  return await service.getPrayerTimes();
+  final times = await service.getPrayerTimes();
+  await service.schedulePrayerNotifications(times);
+  return times;
 });
 
 class PrayerTimesService {
@@ -40,5 +43,30 @@ class PrayerTimesService {
 
     final prayerTimes = PrayerTimes.today(coordinates, params);
     return prayerTimes;
+  }
+
+  Future<void> schedulePrayerNotifications(PrayerTimes times) async {
+    final notificationService = NotificationService();
+    await notificationService.cancelAll();
+
+    final prayers = {
+      'الفجر': times.fajr,
+      'الظهر': times.dhuhr,
+      'العصر': times.asr,
+      'المغرب': times.maghrib,
+      'العشاء': times.isha,
+    };
+
+    int id = 0;
+    prayers.forEach((name, time) {
+      if (time.isAfter(DateTime.now())) {
+        notificationService.scheduleNotification(
+          id++,
+          'حان الآن موعد صلاة $name',
+          'الصلاة خير من النوم${name == 'الفجر' ? ' (الفجر)' : ''}',
+          time,
+        );
+      }
+    });
   }
 }

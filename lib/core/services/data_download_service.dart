@@ -10,8 +10,9 @@ class DataDownloadService {
 
   Future<void> downloadAllData(Function(double) onProgress) async {
     await downloadQuran(onProgress);
-    await downloadTafsir((p) => onProgress(0.7 + (p * 0.2))); // Tafsir is 20%
-    await downloadAzkar((p) => onProgress(0.9 + (p * 0.1))); // Azkar is 10%
+    await downloadTafsir("al_sa'dy.json", 'saadi', (p) => onProgress(0.7 + (p * 0.1)));
+    await downloadTafsir("ebn_katheer.json", 'ibn_kathir', (p) => onProgress(0.8 + (p * 0.1)));
+    await downloadAzkar((p) => onProgress(0.9 + (p * 0.1)));
   }
 
   Future<void> downloadQuran(Function(double) onProgress) async {
@@ -44,11 +45,11 @@ class DataDownloadService {
     }
   }
 
-  Future<void> downloadTafsir(Function(double) onProgress) async {
-    final count = await (db.select(db.tafsirs)..limit(1)).get();
+  Future<void> downloadTafsir(String fileName, String type, Function(double) onProgress) async {
+    final count = await (db.select(db.tafsirs)..where((t) => t.type.equals(type))..limit(1)).get();
     if (count.isNotEmpty) return;
 
-    final response = await http.get(Uri.parse("https://raw.githubusercontent.com/m4hmoud-atef/Islamic-and-quran-data/main/tafseer/al_sa'dy.json"));
+    final response = await http.get(Uri.parse("https://raw.githubusercontent.com/m4hmoud-atef/Islamic-and-quran-data/main/tafseer/$fileName"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as List;
       const batchSize = 100;
@@ -63,7 +64,7 @@ class DataDownloadService {
                 surahNumber: item['sura'] as int,
                 ayahNumber: item['aya'] as int,
                 tafsirText: item['text'] as String,
-                type: 'saadi',
+                type: type,
               )
           ]);
         });
