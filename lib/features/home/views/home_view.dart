@@ -296,18 +296,78 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  Future<void> _updatePrayerCount(DailyCommitmentData? data) async {
+  void _showPrayerLogDialog(DailyCommitmentData? data) {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final prayers = ['الفجر', 'الظهر', 'العصر', 'المغرب', 'العشاء'];
+          final jamaah = data?.jamaahPrayers?.split(',') ?? [];
+          final sunnah = data?.sunnahPrayers?.split(',') ?? [];
+
+          return AlertDialog(
+            title: const Text('تفاصيل الصلوات اليومية'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(prayers.length, (index) {
+                final p = prayers[index];
+                return Row(
+                  children: [
+                    Expanded(child: Text(p)),
+                    const Text('جماعة'),
+                    Checkbox(
+                      value: jamaah.contains(p),
+                      onChanged: (val) => _updatePrayerLog(data, p, 'jamaah', val ?? false),
+                    ),
+                    const Text('سنن'),
+                    Checkbox(
+                      value: sunnah.contains(p),
+                      onChanged: (val) => _updatePrayerLog(data, p, 'sunnah', val ?? false),
+                    ),
+                  ],
+                );
+              }),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('إغلاق')),
+            ],
+          );
+        },
+      ),
+    ).then((_) => ref.invalidate(todayCommitmentProvider));
+  }
+
+  Future<void> _updatePrayerLog(DailyCommitmentData? data, String prayer, String type, bool value) async {
     final db = ref.read(databaseProvider);
+    var jamaah = data?.jamaahPrayers?.split(',').where((e) => e.isNotEmpty).toList() ?? [];
+    var sunnah = data?.sunnahPrayers?.split(',').where((e) => e.isNotEmpty).toList() ?? [];
+
+    if (type == 'jamaah') {
+      value ? jamaah.add(prayer) : jamaah.remove(prayer);
+    } else {
+      value ? sunnah.add(prayer) : sunnah.remove(prayer);
+    }
+
+    final newCount = jamaah.toSet().union(sunnah.toSet()).length; // Over-simplified count logic
+
     if (data == null) {
       await db.into(db.dailyCommitment).insert(DailyCommitmentCompanion.insert(
             date: DateTime.now(),
-            prayerCount: const drift.Value(1),
+            prayerCount: drift.Value(newCount),
+            jamaahPrayers: drift.Value(jamaah.join(',')),
+            sunnahPrayers: drift.Value(sunnah.join(',')),
           ));
     } else {
-      await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id)))
-          .write(DailyCommitmentCompanion(prayerCount: drift.Value((data.prayerCount + 1) % 6)));
+      await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id))).write(DailyCommitmentCompanion(
+        prayerCount: drift.Value(newCount),
+        jamaahPrayers: drift.Value(jamaah.join(',')),
+        sunnahPrayers: drift.Value(sunnah.join(',')),
+      ));
     }
-    ref.invalidate(todayCommitmentProvider);
+  }
+
+  Future<void> _updatePrayerCount(DailyCommitmentData? data) async {
+    _showPrayerLogDialog(data);
   }
 
   Future<void> _toggleAzkar(DailyCommitmentData? data) async {

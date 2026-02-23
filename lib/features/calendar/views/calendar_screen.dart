@@ -63,6 +63,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 final isToday = _isToday(day);
                 final isFasting = _fastingDays.any((d) => d.hDay == day);
                 final hasNote = _notes.any((n) => n.hDay == day);
+                final sunnahFasting = _getSunnahFastingLabel(day);
 
                 return InkWell(
                   onTap: () => _showDayDetails(day),
@@ -72,19 +73,31 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           ? Colors.green
                           : isFasting
                               ? Colors.orange.withValues(alpha: 0.3)
-                              : Colors.grey[200],
+                              : sunnahFasting != null
+                                  ? Colors.orange.withValues(alpha: 0.1)
+                                  : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                       border: hasNote ? Border.all(color: Colors.blue, width: 2) : null,
                     ),
                     child: Stack(
                       children: [
                         Center(
-                          child: Text(
-                            day.toString(),
-                            style: TextStyle(
-                              color: isToday ? Colors.white : Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                day.toString(),
+                                style: TextStyle(
+                                  color: isToday ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (sunnahFasting != null && !isFasting && !isToday)
+                                Text(
+                                  sunnahFasting,
+                                  style: const TextStyle(fontSize: 8, color: Colors.orange),
+                                ),
+                            ],
                           ),
                         ),
                         if (isFasting)
@@ -110,6 +123,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ],
       ),
     );
+  }
+
+  String? _getSunnahFastingLabel(int day) {
+    if (day == 13 || day == 14 || day == 15) return 'بيض';
+
+    final hDate = HijriCalendar();
+    hDate.hYear = _selectedDate.hYear;
+    hDate.hMonth = _selectedDate.hMonth;
+    hDate.hDay = day;
+
+    try {
+      final gDate = DateTime.parse(hDate.toString());
+      if (gDate.weekday == DateTime.monday) return 'اثنين';
+      if (gDate.weekday == DateTime.thursday) return 'خميس';
+    } catch (e) {
+      // Ignore conversion errors
+    }
+
+    if (_selectedDate.hMonth == 12 && day == 9) return 'عرفة';
+    if (_selectedDate.hMonth == 1 && day == 10) return 'عاشوراء';
+
+    return null;
   }
 
   void _showDayDetails(int day) {

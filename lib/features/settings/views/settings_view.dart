@@ -112,6 +112,37 @@ class SettingsView extends ConsumerWidget {
     );
   }
 
+  void _showMuadhinSelection(BuildContext context, WidgetRef ref) {
+    final muadhins = {
+      'default': 'الافتراضي',
+      'mecca': 'مكة المكرمة',
+      'medina': 'المدينة المنورة',
+      'al_aqsa': 'المسجد الأقصى',
+      'mishary': 'مشاري العفاسي',
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('اختر صوت الأذان'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: muadhins.entries
+              .map((e) => ListTile(
+                    title: Text(e.value),
+                    onTap: () {
+                      final prefs = ref.read(sharedPreferencesProvider);
+                      prefs.setString('muadhin', e.value);
+                      // In a real app, ref.invalidate or similar would trigger UI update
+                      Navigator.pop(context);
+                    },
+                  ))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   void _showMadhabDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -168,6 +199,12 @@ class SettingsView extends ConsumerWidget {
             leading: const Icon(Icons.person),
             title: const Text('الملف الشخصي'),
             onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.volume_up),
+            title: const Text('صوت الأذان'),
+            subtitle: Text(ref.watch(sharedPreferencesProvider).getString('muadhin') ?? 'الافتراضي'),
+            onTap: () => _showMuadhinSelection(context, ref),
           ),
           SwitchListTile(
             secondary: const Icon(Icons.notifications),

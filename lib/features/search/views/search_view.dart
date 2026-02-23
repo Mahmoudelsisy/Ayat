@@ -100,7 +100,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
       itemBuilder: (context, index) {
         final ayah = _quranResults[index];
         return ListTile(
-          title: Text(ayah.verseText, textAlign: TextAlign.right, style: const TextStyle(fontFamily: 'Amiri', fontSize: 18)),
+          title: _highlightText(ayah.verseText, _searchController.text, isQuran: true),
           subtitle: Text('سورة ${ayah.surahNumber} - آية ${ayah.ayahNumber}', textAlign: TextAlign.right),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
@@ -124,11 +124,11 @@ class _SearchViewState extends ConsumerState<SearchView> {
       itemCount: _tafsirResults.length,
       itemBuilder: (context, index) {
         final tafsir = _tafsirResults[index];
+        final cleanTafsir = tafsir.tafsirText.replaceAll(RegExp(r'<[^>]*>'), '');
+        final snippet = cleanTafsir.substring(0, (cleanTafsir.length > 150 ? 150 : cleanTafsir.length));
+
         return ListTile(
-          title: Text(
-            '${tafsir.tafsirText.replaceAll(RegExp(r'<[^>]*>'), '').substring(0, (tafsir.tafsirText.length > 100 ? 100 : tafsir.tafsirText.length))}...',
-            textAlign: TextAlign.right,
-          ),
+          title: _highlightText('$snippet...', _searchController.text),
           subtitle: Text('سورة ${tafsir.surahNumber} - آية ${tafsir.ayahNumber} (${tafsir.type})', textAlign: TextAlign.right),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
@@ -141,6 +141,41 @@ class _SearchViewState extends ConsumerState<SearchView> {
           },
         );
       },
+    );
+  }
+
+  Widget _highlightText(String text, String query, {bool isQuran = false}) {
+    if (query.isEmpty) {
+      return Text(text, textAlign: TextAlign.right, style: TextStyle(fontFamily: isQuran ? 'Amiri' : null, fontSize: isQuran ? 18 : null));
+    }
+
+    final matches = query.split(' ').where((s) => s.isNotEmpty).toList();
+    // Simplified: highlight only the first match or full query if found
+    final pattern = RegExp('(${matches.join('|')})', caseSensitive: false);
+    final spans = <TextSpan>[];
+
+    text.splitMapJoin(
+      pattern,
+      onMatch: (m) {
+        spans.add(TextSpan(text: m[0], style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)));
+        return '';
+      },
+      onNonMatch: (n) {
+        spans.add(TextSpan(text: n));
+        return '';
+      },
+    );
+
+    return RichText(
+      textAlign: TextAlign.right,
+      text: TextSpan(
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+          fontFamily: isQuran ? 'Amiri' : null,
+          fontSize: isQuran ? 18 : 16,
+        ),
+        children: spans,
+      ),
     );
   }
 }

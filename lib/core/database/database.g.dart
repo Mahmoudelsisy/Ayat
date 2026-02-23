@@ -3796,6 +3796,28 @@ class $DailyCommitmentTable extends DailyCommitment
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _jamaahPrayersMeta = const VerificationMeta(
+    'jamaahPrayers',
+  );
+  @override
+  late final GeneratedColumn<String> jamaahPrayers = GeneratedColumn<String>(
+    'jamaah_prayers',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sunnahPrayersMeta = const VerificationMeta(
+    'sunnahPrayers',
+  );
+  @override
+  late final GeneratedColumn<String> sunnahPrayers = GeneratedColumn<String>(
+    'sunnah_prayers',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3803,6 +3825,8 @@ class $DailyCommitmentTable extends DailyCommitment
     prayerCount,
     morningAzkar,
     eveningAzkar,
+    jamaahPrayers,
+    sunnahPrayers,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3854,6 +3878,24 @@ class $DailyCommitmentTable extends DailyCommitment
         ),
       );
     }
+    if (data.containsKey('jamaah_prayers')) {
+      context.handle(
+        _jamaahPrayersMeta,
+        jamaahPrayers.isAcceptableOrUnknown(
+          data['jamaah_prayers']!,
+          _jamaahPrayersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sunnah_prayers')) {
+      context.handle(
+        _sunnahPrayersMeta,
+        sunnahPrayers.isAcceptableOrUnknown(
+          data['sunnah_prayers']!,
+          _sunnahPrayersMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3883,6 +3925,14 @@ class $DailyCommitmentTable extends DailyCommitment
         DriftSqlType.bool,
         data['${effectivePrefix}evening_azkar'],
       )!,
+      jamaahPrayers: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}jamaah_prayers'],
+      ),
+      sunnahPrayers: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sunnah_prayers'],
+      ),
     );
   }
 
@@ -3899,12 +3949,16 @@ class DailyCommitmentData extends DataClass
   final int prayerCount;
   final bool morningAzkar;
   final bool eveningAzkar;
+  final String? jamaahPrayers;
+  final String? sunnahPrayers;
   const DailyCommitmentData({
     required this.id,
     required this.date,
     required this.prayerCount,
     required this.morningAzkar,
     required this.eveningAzkar,
+    this.jamaahPrayers,
+    this.sunnahPrayers,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3914,6 +3968,12 @@ class DailyCommitmentData extends DataClass
     map['prayer_count'] = Variable<int>(prayerCount);
     map['morning_azkar'] = Variable<bool>(morningAzkar);
     map['evening_azkar'] = Variable<bool>(eveningAzkar);
+    if (!nullToAbsent || jamaahPrayers != null) {
+      map['jamaah_prayers'] = Variable<String>(jamaahPrayers);
+    }
+    if (!nullToAbsent || sunnahPrayers != null) {
+      map['sunnah_prayers'] = Variable<String>(sunnahPrayers);
+    }
     return map;
   }
 
@@ -3924,6 +3984,12 @@ class DailyCommitmentData extends DataClass
       prayerCount: Value(prayerCount),
       morningAzkar: Value(morningAzkar),
       eveningAzkar: Value(eveningAzkar),
+      jamaahPrayers: jamaahPrayers == null && nullToAbsent
+          ? const Value.absent()
+          : Value(jamaahPrayers),
+      sunnahPrayers: sunnahPrayers == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sunnahPrayers),
     );
   }
 
@@ -3938,6 +4004,8 @@ class DailyCommitmentData extends DataClass
       prayerCount: serializer.fromJson<int>(json['prayerCount']),
       morningAzkar: serializer.fromJson<bool>(json['morningAzkar']),
       eveningAzkar: serializer.fromJson<bool>(json['eveningAzkar']),
+      jamaahPrayers: serializer.fromJson<String?>(json['jamaahPrayers']),
+      sunnahPrayers: serializer.fromJson<String?>(json['sunnahPrayers']),
     );
   }
   @override
@@ -3949,6 +4017,8 @@ class DailyCommitmentData extends DataClass
       'prayerCount': serializer.toJson<int>(prayerCount),
       'morningAzkar': serializer.toJson<bool>(morningAzkar),
       'eveningAzkar': serializer.toJson<bool>(eveningAzkar),
+      'jamaahPrayers': serializer.toJson<String?>(jamaahPrayers),
+      'sunnahPrayers': serializer.toJson<String?>(sunnahPrayers),
     };
   }
 
@@ -3958,12 +4028,20 @@ class DailyCommitmentData extends DataClass
     int? prayerCount,
     bool? morningAzkar,
     bool? eveningAzkar,
+    Value<String?> jamaahPrayers = const Value.absent(),
+    Value<String?> sunnahPrayers = const Value.absent(),
   }) => DailyCommitmentData(
     id: id ?? this.id,
     date: date ?? this.date,
     prayerCount: prayerCount ?? this.prayerCount,
     morningAzkar: morningAzkar ?? this.morningAzkar,
     eveningAzkar: eveningAzkar ?? this.eveningAzkar,
+    jamaahPrayers: jamaahPrayers.present
+        ? jamaahPrayers.value
+        : this.jamaahPrayers,
+    sunnahPrayers: sunnahPrayers.present
+        ? sunnahPrayers.value
+        : this.sunnahPrayers,
   );
   DailyCommitmentData copyWithCompanion(DailyCommitmentCompanion data) {
     return DailyCommitmentData(
@@ -3978,6 +4056,12 @@ class DailyCommitmentData extends DataClass
       eveningAzkar: data.eveningAzkar.present
           ? data.eveningAzkar.value
           : this.eveningAzkar,
+      jamaahPrayers: data.jamaahPrayers.present
+          ? data.jamaahPrayers.value
+          : this.jamaahPrayers,
+      sunnahPrayers: data.sunnahPrayers.present
+          ? data.sunnahPrayers.value
+          : this.sunnahPrayers,
     );
   }
 
@@ -3988,14 +4072,23 @@ class DailyCommitmentData extends DataClass
           ..write('date: $date, ')
           ..write('prayerCount: $prayerCount, ')
           ..write('morningAzkar: $morningAzkar, ')
-          ..write('eveningAzkar: $eveningAzkar')
+          ..write('eveningAzkar: $eveningAzkar, ')
+          ..write('jamaahPrayers: $jamaahPrayers, ')
+          ..write('sunnahPrayers: $sunnahPrayers')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, date, prayerCount, morningAzkar, eveningAzkar);
+  int get hashCode => Object.hash(
+    id,
+    date,
+    prayerCount,
+    morningAzkar,
+    eveningAzkar,
+    jamaahPrayers,
+    sunnahPrayers,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4004,7 +4097,9 @@ class DailyCommitmentData extends DataClass
           other.date == this.date &&
           other.prayerCount == this.prayerCount &&
           other.morningAzkar == this.morningAzkar &&
-          other.eveningAzkar == this.eveningAzkar);
+          other.eveningAzkar == this.eveningAzkar &&
+          other.jamaahPrayers == this.jamaahPrayers &&
+          other.sunnahPrayers == this.sunnahPrayers);
 }
 
 class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
@@ -4013,12 +4108,16 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
   final Value<int> prayerCount;
   final Value<bool> morningAzkar;
   final Value<bool> eveningAzkar;
+  final Value<String?> jamaahPrayers;
+  final Value<String?> sunnahPrayers;
   const DailyCommitmentCompanion({
     this.id = const Value.absent(),
     this.date = const Value.absent(),
     this.prayerCount = const Value.absent(),
     this.morningAzkar = const Value.absent(),
     this.eveningAzkar = const Value.absent(),
+    this.jamaahPrayers = const Value.absent(),
+    this.sunnahPrayers = const Value.absent(),
   });
   DailyCommitmentCompanion.insert({
     this.id = const Value.absent(),
@@ -4026,6 +4125,8 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
     this.prayerCount = const Value.absent(),
     this.morningAzkar = const Value.absent(),
     this.eveningAzkar = const Value.absent(),
+    this.jamaahPrayers = const Value.absent(),
+    this.sunnahPrayers = const Value.absent(),
   }) : date = Value(date);
   static Insertable<DailyCommitmentData> custom({
     Expression<int>? id,
@@ -4033,6 +4134,8 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
     Expression<int>? prayerCount,
     Expression<bool>? morningAzkar,
     Expression<bool>? eveningAzkar,
+    Expression<String>? jamaahPrayers,
+    Expression<String>? sunnahPrayers,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -4040,6 +4143,8 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
       if (prayerCount != null) 'prayer_count': prayerCount,
       if (morningAzkar != null) 'morning_azkar': morningAzkar,
       if (eveningAzkar != null) 'evening_azkar': eveningAzkar,
+      if (jamaahPrayers != null) 'jamaah_prayers': jamaahPrayers,
+      if (sunnahPrayers != null) 'sunnah_prayers': sunnahPrayers,
     });
   }
 
@@ -4049,6 +4154,8 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
     Value<int>? prayerCount,
     Value<bool>? morningAzkar,
     Value<bool>? eveningAzkar,
+    Value<String?>? jamaahPrayers,
+    Value<String?>? sunnahPrayers,
   }) {
     return DailyCommitmentCompanion(
       id: id ?? this.id,
@@ -4056,6 +4163,8 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
       prayerCount: prayerCount ?? this.prayerCount,
       morningAzkar: morningAzkar ?? this.morningAzkar,
       eveningAzkar: eveningAzkar ?? this.eveningAzkar,
+      jamaahPrayers: jamaahPrayers ?? this.jamaahPrayers,
+      sunnahPrayers: sunnahPrayers ?? this.sunnahPrayers,
     );
   }
 
@@ -4077,6 +4186,12 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
     if (eveningAzkar.present) {
       map['evening_azkar'] = Variable<bool>(eveningAzkar.value);
     }
+    if (jamaahPrayers.present) {
+      map['jamaah_prayers'] = Variable<String>(jamaahPrayers.value);
+    }
+    if (sunnahPrayers.present) {
+      map['sunnah_prayers'] = Variable<String>(sunnahPrayers.value);
+    }
     return map;
   }
 
@@ -4087,7 +4202,9 @@ class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
           ..write('date: $date, ')
           ..write('prayerCount: $prayerCount, ')
           ..write('morningAzkar: $morningAzkar, ')
-          ..write('eveningAzkar: $eveningAzkar')
+          ..write('eveningAzkar: $eveningAzkar, ')
+          ..write('jamaahPrayers: $jamaahPrayers, ')
+          ..write('sunnahPrayers: $sunnahPrayers')
           ..write(')'))
         .toString();
   }
@@ -6162,6 +6279,8 @@ typedef $$DailyCommitmentTableCreateCompanionBuilder =
       Value<int> prayerCount,
       Value<bool> morningAzkar,
       Value<bool> eveningAzkar,
+      Value<String?> jamaahPrayers,
+      Value<String?> sunnahPrayers,
     });
 typedef $$DailyCommitmentTableUpdateCompanionBuilder =
     DailyCommitmentCompanion Function({
@@ -6170,6 +6289,8 @@ typedef $$DailyCommitmentTableUpdateCompanionBuilder =
       Value<int> prayerCount,
       Value<bool> morningAzkar,
       Value<bool> eveningAzkar,
+      Value<String?> jamaahPrayers,
+      Value<String?> sunnahPrayers,
     });
 
 class $$DailyCommitmentTableFilterComposer
@@ -6203,6 +6324,16 @@ class $$DailyCommitmentTableFilterComposer
 
   ColumnFilters<bool> get eveningAzkar => $composableBuilder(
     column: $table.eveningAzkar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jamaahPrayers => $composableBuilder(
+    column: $table.jamaahPrayers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sunnahPrayers => $composableBuilder(
+    column: $table.sunnahPrayers,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6240,6 +6371,16 @@ class $$DailyCommitmentTableOrderingComposer
     column: $table.eveningAzkar,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get jamaahPrayers => $composableBuilder(
+    column: $table.jamaahPrayers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sunnahPrayers => $composableBuilder(
+    column: $table.sunnahPrayers,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DailyCommitmentTableAnnotationComposer
@@ -6269,6 +6410,16 @@ class $$DailyCommitmentTableAnnotationComposer
 
   GeneratedColumn<bool> get eveningAzkar => $composableBuilder(
     column: $table.eveningAzkar,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get jamaahPrayers => $composableBuilder(
+    column: $table.jamaahPrayers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sunnahPrayers => $composableBuilder(
+    column: $table.sunnahPrayers,
     builder: (column) => column,
   );
 }
@@ -6315,12 +6466,16 @@ class $$DailyCommitmentTableTableManager
                 Value<int> prayerCount = const Value.absent(),
                 Value<bool> morningAzkar = const Value.absent(),
                 Value<bool> eveningAzkar = const Value.absent(),
+                Value<String?> jamaahPrayers = const Value.absent(),
+                Value<String?> sunnahPrayers = const Value.absent(),
               }) => DailyCommitmentCompanion(
                 id: id,
                 date: date,
                 prayerCount: prayerCount,
                 morningAzkar: morningAzkar,
                 eveningAzkar: eveningAzkar,
+                jamaahPrayers: jamaahPrayers,
+                sunnahPrayers: sunnahPrayers,
               ),
           createCompanionCallback:
               ({
@@ -6329,12 +6484,16 @@ class $$DailyCommitmentTableTableManager
                 Value<int> prayerCount = const Value.absent(),
                 Value<bool> morningAzkar = const Value.absent(),
                 Value<bool> eveningAzkar = const Value.absent(),
+                Value<String?> jamaahPrayers = const Value.absent(),
+                Value<String?> sunnahPrayers = const Value.absent(),
               }) => DailyCommitmentCompanion.insert(
                 id: id,
                 date: date,
                 prayerCount: prayerCount,
                 morningAzkar: morningAzkar,
                 eveningAzkar: eveningAzkar,
+                jamaahPrayers: jamaahPrayers,
+                sunnahPrayers: sunnahPrayers,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
