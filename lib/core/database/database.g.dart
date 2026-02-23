@@ -1075,17 +1075,334 @@ class AzkarCompanion extends UpdateCompanion<AzkarData> {
   }
 }
 
+class $UserProgressTable extends UserProgress
+    with TableInfo<$UserProgressTable, UserProgressData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _surahNumberMeta = const VerificationMeta(
+    'surahNumber',
+  );
+  @override
+  late final GeneratedColumn<int> surahNumber = GeneratedColumn<int>(
+    'surah_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ayahNumberMeta = const VerificationMeta(
+    'ayahNumber',
+  );
+  @override
+  late final GeneratedColumn<int> ayahNumber = GeneratedColumn<int>(
+    'ayah_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    surahNumber,
+    ayahNumber,
+    timestamp,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserProgressData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('surah_number')) {
+      context.handle(
+        _surahNumberMeta,
+        surahNumber.isAcceptableOrUnknown(
+          data['surah_number']!,
+          _surahNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_surahNumberMeta);
+    }
+    if (data.containsKey('ayah_number')) {
+      context.handle(
+        _ayahNumberMeta,
+        ayahNumber.isAcceptableOrUnknown(data['ayah_number']!, _ayahNumberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ayahNumberMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserProgressData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserProgressData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      surahNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}surah_number'],
+      )!,
+      ayahNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ayah_number'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+    );
+  }
+
+  @override
+  $UserProgressTable createAlias(String alias) {
+    return $UserProgressTable(attachedDatabase, alias);
+  }
+}
+
+class UserProgressData extends DataClass
+    implements Insertable<UserProgressData> {
+  final int id;
+  final int surahNumber;
+  final int ayahNumber;
+  final DateTime timestamp;
+  const UserProgressData({
+    required this.id,
+    required this.surahNumber,
+    required this.ayahNumber,
+    required this.timestamp,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['surah_number'] = Variable<int>(surahNumber);
+    map['ayah_number'] = Variable<int>(ayahNumber);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  UserProgressCompanion toCompanion(bool nullToAbsent) {
+    return UserProgressCompanion(
+      id: Value(id),
+      surahNumber: Value(surahNumber),
+      ayahNumber: Value(ayahNumber),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory UserProgressData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserProgressData(
+      id: serializer.fromJson<int>(json['id']),
+      surahNumber: serializer.fromJson<int>(json['surahNumber']),
+      ayahNumber: serializer.fromJson<int>(json['ayahNumber']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'surahNumber': serializer.toJson<int>(surahNumber),
+      'ayahNumber': serializer.toJson<int>(ayahNumber),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  UserProgressData copyWith({
+    int? id,
+    int? surahNumber,
+    int? ayahNumber,
+    DateTime? timestamp,
+  }) => UserProgressData(
+    id: id ?? this.id,
+    surahNumber: surahNumber ?? this.surahNumber,
+    ayahNumber: ayahNumber ?? this.ayahNumber,
+    timestamp: timestamp ?? this.timestamp,
+  );
+  UserProgressData copyWithCompanion(UserProgressCompanion data) {
+    return UserProgressData(
+      id: data.id.present ? data.id.value : this.id,
+      surahNumber: data.surahNumber.present
+          ? data.surahNumber.value
+          : this.surahNumber,
+      ayahNumber: data.ayahNumber.present
+          ? data.ayahNumber.value
+          : this.ayahNumber,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserProgressData(')
+          ..write('id: $id, ')
+          ..write('surahNumber: $surahNumber, ')
+          ..write('ayahNumber: $ayahNumber, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, surahNumber, ayahNumber, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserProgressData &&
+          other.id == this.id &&
+          other.surahNumber == this.surahNumber &&
+          other.ayahNumber == this.ayahNumber &&
+          other.timestamp == this.timestamp);
+}
+
+class UserProgressCompanion extends UpdateCompanion<UserProgressData> {
+  final Value<int> id;
+  final Value<int> surahNumber;
+  final Value<int> ayahNumber;
+  final Value<DateTime> timestamp;
+  const UserProgressCompanion({
+    this.id = const Value.absent(),
+    this.surahNumber = const Value.absent(),
+    this.ayahNumber = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  UserProgressCompanion.insert({
+    this.id = const Value.absent(),
+    required int surahNumber,
+    required int ayahNumber,
+    this.timestamp = const Value.absent(),
+  }) : surahNumber = Value(surahNumber),
+       ayahNumber = Value(ayahNumber);
+  static Insertable<UserProgressData> custom({
+    Expression<int>? id,
+    Expression<int>? surahNumber,
+    Expression<int>? ayahNumber,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (surahNumber != null) 'surah_number': surahNumber,
+      if (ayahNumber != null) 'ayah_number': ayahNumber,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  UserProgressCompanion copyWith({
+    Value<int>? id,
+    Value<int>? surahNumber,
+    Value<int>? ayahNumber,
+    Value<DateTime>? timestamp,
+  }) {
+    return UserProgressCompanion(
+      id: id ?? this.id,
+      surahNumber: surahNumber ?? this.surahNumber,
+      ayahNumber: ayahNumber ?? this.ayahNumber,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (surahNumber.present) {
+      map['surah_number'] = Variable<int>(surahNumber.value);
+    }
+    if (ayahNumber.present) {
+      map['ayah_number'] = Variable<int>(ayahNumber.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserProgressCompanion(')
+          ..write('id: $id, ')
+          ..write('surahNumber: $surahNumber, ')
+          ..write('ayahNumber: $ayahNumber, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $QuranTable quran = $QuranTable(this);
   late final $TafsirsTable tafsirs = $TafsirsTable(this);
   late final $AzkarTable azkar = $AzkarTable(this);
+  late final $UserProgressTable userProgress = $UserProgressTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [quran, tafsirs, azkar];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    quran,
+    tafsirs,
+    azkar,
+    userProgress,
+  ];
 }
 
 typedef $$QuranTableCreateCompanionBuilder =
@@ -1662,6 +1979,185 @@ typedef $$AzkarTableProcessedTableManager =
       AzkarData,
       PrefetchHooks Function()
     >;
+typedef $$UserProgressTableCreateCompanionBuilder =
+    UserProgressCompanion Function({
+      Value<int> id,
+      required int surahNumber,
+      required int ayahNumber,
+      Value<DateTime> timestamp,
+    });
+typedef $$UserProgressTableUpdateCompanionBuilder =
+    UserProgressCompanion Function({
+      Value<int> id,
+      Value<int> surahNumber,
+      Value<int> ayahNumber,
+      Value<DateTime> timestamp,
+    });
+
+class $$UserProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $UserProgressTable> {
+  $$UserProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get surahNumber => $composableBuilder(
+    column: $table.surahNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ayahNumber => $composableBuilder(
+    column: $table.ayahNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UserProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserProgressTable> {
+  $$UserProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get surahNumber => $composableBuilder(
+    column: $table.surahNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ayahNumber => $composableBuilder(
+    column: $table.ayahNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserProgressTable> {
+  $$UserProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get surahNumber => $composableBuilder(
+    column: $table.surahNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get ayahNumber => $composableBuilder(
+    column: $table.ayahNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$UserProgressTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserProgressTable,
+          UserProgressData,
+          $$UserProgressTableFilterComposer,
+          $$UserProgressTableOrderingComposer,
+          $$UserProgressTableAnnotationComposer,
+          $$UserProgressTableCreateCompanionBuilder,
+          $$UserProgressTableUpdateCompanionBuilder,
+          (
+            UserProgressData,
+            BaseReferences<_$AppDatabase, $UserProgressTable, UserProgressData>,
+          ),
+          UserProgressData,
+          PrefetchHooks Function()
+        > {
+  $$UserProgressTableTableManager(_$AppDatabase db, $UserProgressTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserProgressTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserProgressTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserProgressTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> surahNumber = const Value.absent(),
+                Value<int> ayahNumber = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => UserProgressCompanion(
+                id: id,
+                surahNumber: surahNumber,
+                ayahNumber: ayahNumber,
+                timestamp: timestamp,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int surahNumber,
+                required int ayahNumber,
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => UserProgressCompanion.insert(
+                id: id,
+                surahNumber: surahNumber,
+                ayahNumber: ayahNumber,
+                timestamp: timestamp,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserProgressTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserProgressTable,
+      UserProgressData,
+      $$UserProgressTableFilterComposer,
+      $$UserProgressTableOrderingComposer,
+      $$UserProgressTableAnnotationComposer,
+      $$UserProgressTableCreateCompanionBuilder,
+      $$UserProgressTableUpdateCompanionBuilder,
+      (
+        UserProgressData,
+        BaseReferences<_$AppDatabase, $UserProgressTable, UserProgressData>,
+      ),
+      UserProgressData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1672,4 +2168,6 @@ class $AppDatabaseManager {
       $$TafsirsTableTableManager(_db, _db.tafsirs);
   $$AzkarTableTableManager get azkar =>
       $$AzkarTableTableManager(_db, _db.azkar);
+  $$UserProgressTableTableManager get userProgress =>
+      $$UserProgressTableTableManager(_db, _db.userProgress);
 }

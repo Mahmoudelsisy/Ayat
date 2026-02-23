@@ -10,7 +10,8 @@ class DataDownloadService {
 
   Future<void> downloadAllData(Function(double) onProgress) async {
     await downloadQuran(onProgress);
-    await downloadAzkar(onProgress);
+    await downloadTafsir((p) => onProgress(0.7 + (p * 0.2))); // Tafsir is 20%
+    await downloadAzkar((p) => onProgress(0.9 + (p * 0.1))); // Azkar is 10%
   }
 
   Future<void> downloadQuran(Function(double) onProgress) async {
@@ -43,6 +44,34 @@ class DataDownloadService {
     }
   }
 
+  Future<void> downloadTafsir(Function(double) onProgress) async {
+    final count = await (db.select(db.tafsirs)..limit(1)).get();
+    if (count.isNotEmpty) return;
+
+    final response = await http.get(Uri.parse("https://raw.githubusercontent.com/m4hmoud-atef/Islamic-and-quran-data/main/tafseer/al_sa'dy.json"));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as List;
+      const batchSize = 100;
+      for (var i = 0; i < data.length; i += batchSize) {
+        final end = (i + batchSize < data.length) ? i + batchSize : data.length;
+        final batchData = data.sublist(i, end);
+
+        await db.batch((batch) {
+          batch.insertAll(db.tafsirs, [
+            for (var item in batchData)
+              TafsirsCompanion.insert(
+                surahNumber: item['sura'] as int,
+                ayahNumber: item['aya'] as int,
+                tafsirText: item['text'] as String,
+                type: 'saadi',
+              )
+          ]);
+        });
+        onProgress(end / data.length);
+      }
+    }
+  }
+
   Future<void> downloadAzkar(Function(double) onProgress) async {
     final count = await (db.select(db.azkar)..limit(1)).get();
     if (count.isNotEmpty) return;
@@ -65,7 +94,7 @@ class DataDownloadService {
               )
           ]);
         });
-        onProgress(0.7 + ((i + 1) / data.length * 0.3)); // Azkar is 30%
+        onProgress((i + 1) / data.length);
       }
     }
   }
