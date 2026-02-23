@@ -65,6 +65,17 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _pageNumberMeta = const VerificationMeta(
+    'pageNumber',
+  );
+  @override
+  late final GeneratedColumn<int> pageNumber = GeneratedColumn<int>(
+    'page_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _verseTextMeta = const VerificationMeta(
     'verseText',
   );
@@ -106,6 +117,7 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     ayahNumber,
     juzNumber,
     hizbNumber,
+    pageNumber,
     verseText,
     translation,
     reading,
@@ -154,6 +166,12 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
       context.handle(
         _hizbNumberMeta,
         hizbNumber.isAcceptableOrUnknown(data['hizb_number']!, _hizbNumberMeta),
+      );
+    }
+    if (data.containsKey('page_number')) {
+      context.handle(
+        _pageNumberMeta,
+        pageNumber.isAcceptableOrUnknown(data['page_number']!, _pageNumberMeta),
       );
     }
     if (data.containsKey('verse_text')) {
@@ -208,6 +226,10 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
         DriftSqlType.int,
         data['${effectivePrefix}hizb_number'],
       ),
+      pageNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page_number'],
+      ),
       verseText: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}verse_text'],
@@ -235,6 +257,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
   final int ayahNumber;
   final int? juzNumber;
   final int? hizbNumber;
+  final int? pageNumber;
   final String verseText;
   final String? translation;
   final String reading;
@@ -244,6 +267,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     required this.ayahNumber,
     this.juzNumber,
     this.hizbNumber,
+    this.pageNumber,
     required this.verseText,
     this.translation,
     required this.reading,
@@ -259,6 +283,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     }
     if (!nullToAbsent || hizbNumber != null) {
       map['hizb_number'] = Variable<int>(hizbNumber);
+    }
+    if (!nullToAbsent || pageNumber != null) {
+      map['page_number'] = Variable<int>(pageNumber);
     }
     map['verse_text'] = Variable<String>(verseText);
     if (!nullToAbsent || translation != null) {
@@ -279,6 +306,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       hizbNumber: hizbNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(hizbNumber),
+      pageNumber: pageNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pageNumber),
       verseText: Value(verseText),
       translation: translation == null && nullToAbsent
           ? const Value.absent()
@@ -298,6 +328,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       ayahNumber: serializer.fromJson<int>(json['ayahNumber']),
       juzNumber: serializer.fromJson<int?>(json['juzNumber']),
       hizbNumber: serializer.fromJson<int?>(json['hizbNumber']),
+      pageNumber: serializer.fromJson<int?>(json['pageNumber']),
       verseText: serializer.fromJson<String>(json['verseText']),
       translation: serializer.fromJson<String?>(json['translation']),
       reading: serializer.fromJson<String>(json['reading']),
@@ -312,6 +343,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       'ayahNumber': serializer.toJson<int>(ayahNumber),
       'juzNumber': serializer.toJson<int?>(juzNumber),
       'hizbNumber': serializer.toJson<int?>(hizbNumber),
+      'pageNumber': serializer.toJson<int?>(pageNumber),
       'verseText': serializer.toJson<String>(verseText),
       'translation': serializer.toJson<String?>(translation),
       'reading': serializer.toJson<String>(reading),
@@ -324,6 +356,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     int? ayahNumber,
     Value<int?> juzNumber = const Value.absent(),
     Value<int?> hizbNumber = const Value.absent(),
+    Value<int?> pageNumber = const Value.absent(),
     String? verseText,
     Value<String?> translation = const Value.absent(),
     String? reading,
@@ -333,6 +366,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     ayahNumber: ayahNumber ?? this.ayahNumber,
     juzNumber: juzNumber.present ? juzNumber.value : this.juzNumber,
     hizbNumber: hizbNumber.present ? hizbNumber.value : this.hizbNumber,
+    pageNumber: pageNumber.present ? pageNumber.value : this.pageNumber,
     verseText: verseText ?? this.verseText,
     translation: translation.present ? translation.value : this.translation,
     reading: reading ?? this.reading,
@@ -350,6 +384,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       hizbNumber: data.hizbNumber.present
           ? data.hizbNumber.value
           : this.hizbNumber,
+      pageNumber: data.pageNumber.present
+          ? data.pageNumber.value
+          : this.pageNumber,
       verseText: data.verseText.present ? data.verseText.value : this.verseText,
       translation: data.translation.present
           ? data.translation.value
@@ -366,6 +403,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           ..write('ayahNumber: $ayahNumber, ')
           ..write('juzNumber: $juzNumber, ')
           ..write('hizbNumber: $hizbNumber, ')
+          ..write('pageNumber: $pageNumber, ')
           ..write('verseText: $verseText, ')
           ..write('translation: $translation, ')
           ..write('reading: $reading')
@@ -380,6 +418,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     ayahNumber,
     juzNumber,
     hizbNumber,
+    pageNumber,
     verseText,
     translation,
     reading,
@@ -393,6 +432,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           other.ayahNumber == this.ayahNumber &&
           other.juzNumber == this.juzNumber &&
           other.hizbNumber == this.hizbNumber &&
+          other.pageNumber == this.pageNumber &&
           other.verseText == this.verseText &&
           other.translation == this.translation &&
           other.reading == this.reading);
@@ -404,6 +444,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
   final Value<int> ayahNumber;
   final Value<int?> juzNumber;
   final Value<int?> hizbNumber;
+  final Value<int?> pageNumber;
   final Value<String> verseText;
   final Value<String?> translation;
   final Value<String> reading;
@@ -413,6 +454,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     this.ayahNumber = const Value.absent(),
     this.juzNumber = const Value.absent(),
     this.hizbNumber = const Value.absent(),
+    this.pageNumber = const Value.absent(),
     this.verseText = const Value.absent(),
     this.translation = const Value.absent(),
     this.reading = const Value.absent(),
@@ -423,6 +465,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     required int ayahNumber,
     this.juzNumber = const Value.absent(),
     this.hizbNumber = const Value.absent(),
+    this.pageNumber = const Value.absent(),
     required String verseText,
     this.translation = const Value.absent(),
     this.reading = const Value.absent(),
@@ -435,6 +478,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Expression<int>? ayahNumber,
     Expression<int>? juzNumber,
     Expression<int>? hizbNumber,
+    Expression<int>? pageNumber,
     Expression<String>? verseText,
     Expression<String>? translation,
     Expression<String>? reading,
@@ -445,6 +489,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
       if (ayahNumber != null) 'ayah_number': ayahNumber,
       if (juzNumber != null) 'juz_number': juzNumber,
       if (hizbNumber != null) 'hizb_number': hizbNumber,
+      if (pageNumber != null) 'page_number': pageNumber,
       if (verseText != null) 'verse_text': verseText,
       if (translation != null) 'translation': translation,
       if (reading != null) 'reading': reading,
@@ -457,6 +502,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Value<int>? ayahNumber,
     Value<int?>? juzNumber,
     Value<int?>? hizbNumber,
+    Value<int?>? pageNumber,
     Value<String>? verseText,
     Value<String?>? translation,
     Value<String>? reading,
@@ -467,6 +513,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
       ayahNumber: ayahNumber ?? this.ayahNumber,
       juzNumber: juzNumber ?? this.juzNumber,
       hizbNumber: hizbNumber ?? this.hizbNumber,
+      pageNumber: pageNumber ?? this.pageNumber,
       verseText: verseText ?? this.verseText,
       translation: translation ?? this.translation,
       reading: reading ?? this.reading,
@@ -491,6 +538,9 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     if (hizbNumber.present) {
       map['hizb_number'] = Variable<int>(hizbNumber.value);
     }
+    if (pageNumber.present) {
+      map['page_number'] = Variable<int>(pageNumber.value);
+    }
     if (verseText.present) {
       map['verse_text'] = Variable<String>(verseText.value);
     }
@@ -511,6 +561,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
           ..write('ayahNumber: $ayahNumber, ')
           ..write('juzNumber: $juzNumber, ')
           ..write('hizbNumber: $hizbNumber, ')
+          ..write('pageNumber: $pageNumber, ')
           ..write('verseText: $verseText, ')
           ..write('translation: $translation, ')
           ..write('reading: $reading')
@@ -2139,6 +2190,410 @@ class AllahNamesCompanion extends UpdateCompanion<AllahName> {
   }
 }
 
+class $KhatmaPlansTable extends KhatmaPlans
+    with TableInfo<$KhatmaPlansTable, KhatmaPlan> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $KhatmaPlansTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetDaysMeta = const VerificationMeta(
+    'targetDays',
+  );
+  @override
+  late final GeneratedColumn<int> targetDays = GeneratedColumn<int>(
+    'target_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _progressAyahsMeta = const VerificationMeta(
+    'progressAyahs',
+  );
+  @override
+  late final GeneratedColumn<int> progressAyahs = GeneratedColumn<int>(
+    'progress_ayahs',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    startDate,
+    targetDays,
+    progressAyahs,
+    isActive,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'khatma_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<KhatmaPlan> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('target_days')) {
+      context.handle(
+        _targetDaysMeta,
+        targetDays.isAcceptableOrUnknown(data['target_days']!, _targetDaysMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetDaysMeta);
+    }
+    if (data.containsKey('progress_ayahs')) {
+      context.handle(
+        _progressAyahsMeta,
+        progressAyahs.isAcceptableOrUnknown(
+          data['progress_ayahs']!,
+          _progressAyahsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  KhatmaPlan map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return KhatmaPlan(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_date'],
+      )!,
+      targetDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_days'],
+      )!,
+      progressAyahs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}progress_ayahs'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+    );
+  }
+
+  @override
+  $KhatmaPlansTable createAlias(String alias) {
+    return $KhatmaPlansTable(attachedDatabase, alias);
+  }
+}
+
+class KhatmaPlan extends DataClass implements Insertable<KhatmaPlan> {
+  final int id;
+  final String title;
+  final DateTime startDate;
+  final int targetDays;
+  final int progressAyahs;
+  final bool isActive;
+  const KhatmaPlan({
+    required this.id,
+    required this.title,
+    required this.startDate,
+    required this.targetDays,
+    required this.progressAyahs,
+    required this.isActive,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['start_date'] = Variable<DateTime>(startDate);
+    map['target_days'] = Variable<int>(targetDays);
+    map['progress_ayahs'] = Variable<int>(progressAyahs);
+    map['is_active'] = Variable<bool>(isActive);
+    return map;
+  }
+
+  KhatmaPlansCompanion toCompanion(bool nullToAbsent) {
+    return KhatmaPlansCompanion(
+      id: Value(id),
+      title: Value(title),
+      startDate: Value(startDate),
+      targetDays: Value(targetDays),
+      progressAyahs: Value(progressAyahs),
+      isActive: Value(isActive),
+    );
+  }
+
+  factory KhatmaPlan.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return KhatmaPlan(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      targetDays: serializer.fromJson<int>(json['targetDays']),
+      progressAyahs: serializer.fromJson<int>(json['progressAyahs']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'targetDays': serializer.toJson<int>(targetDays),
+      'progressAyahs': serializer.toJson<int>(progressAyahs),
+      'isActive': serializer.toJson<bool>(isActive),
+    };
+  }
+
+  KhatmaPlan copyWith({
+    int? id,
+    String? title,
+    DateTime? startDate,
+    int? targetDays,
+    int? progressAyahs,
+    bool? isActive,
+  }) => KhatmaPlan(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    startDate: startDate ?? this.startDate,
+    targetDays: targetDays ?? this.targetDays,
+    progressAyahs: progressAyahs ?? this.progressAyahs,
+    isActive: isActive ?? this.isActive,
+  );
+  KhatmaPlan copyWithCompanion(KhatmaPlansCompanion data) {
+    return KhatmaPlan(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      targetDays: data.targetDays.present
+          ? data.targetDays.value
+          : this.targetDays,
+      progressAyahs: data.progressAyahs.present
+          ? data.progressAyahs.value
+          : this.progressAyahs,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KhatmaPlan(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('startDate: $startDate, ')
+          ..write('targetDays: $targetDays, ')
+          ..write('progressAyahs: $progressAyahs, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, title, startDate, targetDays, progressAyahs, isActive);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is KhatmaPlan &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.startDate == this.startDate &&
+          other.targetDays == this.targetDays &&
+          other.progressAyahs == this.progressAyahs &&
+          other.isActive == this.isActive);
+}
+
+class KhatmaPlansCompanion extends UpdateCompanion<KhatmaPlan> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<DateTime> startDate;
+  final Value<int> targetDays;
+  final Value<int> progressAyahs;
+  final Value<bool> isActive;
+  const KhatmaPlansCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.targetDays = const Value.absent(),
+    this.progressAyahs = const Value.absent(),
+    this.isActive = const Value.absent(),
+  });
+  KhatmaPlansCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    required DateTime startDate,
+    required int targetDays,
+    this.progressAyahs = const Value.absent(),
+    this.isActive = const Value.absent(),
+  }) : title = Value(title),
+       startDate = Value(startDate),
+       targetDays = Value(targetDays);
+  static Insertable<KhatmaPlan> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<DateTime>? startDate,
+    Expression<int>? targetDays,
+    Expression<int>? progressAyahs,
+    Expression<bool>? isActive,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (startDate != null) 'start_date': startDate,
+      if (targetDays != null) 'target_days': targetDays,
+      if (progressAyahs != null) 'progress_ayahs': progressAyahs,
+      if (isActive != null) 'is_active': isActive,
+    });
+  }
+
+  KhatmaPlansCompanion copyWith({
+    Value<int>? id,
+    Value<String>? title,
+    Value<DateTime>? startDate,
+    Value<int>? targetDays,
+    Value<int>? progressAyahs,
+    Value<bool>? isActive,
+  }) {
+    return KhatmaPlansCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      startDate: startDate ?? this.startDate,
+      targetDays: targetDays ?? this.targetDays,
+      progressAyahs: progressAyahs ?? this.progressAyahs,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (targetDays.present) {
+      map['target_days'] = Variable<int>(targetDays.value);
+    }
+    if (progressAyahs.present) {
+      map['progress_ayahs'] = Variable<int>(progressAyahs.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KhatmaPlansCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('startDate: $startDate, ')
+          ..write('targetDays: $targetDays, ')
+          ..write('progressAyahs: $progressAyahs, ')
+          ..write('isActive: $isActive')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2148,6 +2603,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UserProgressTable userProgress = $UserProgressTable(this);
   late final $BookmarksTable bookmarks = $BookmarksTable(this);
   late final $AllahNamesTable allahNames = $AllahNamesTable(this);
+  late final $KhatmaPlansTable khatmaPlans = $KhatmaPlansTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2159,6 +2615,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userProgress,
     bookmarks,
     allahNames,
+    khatmaPlans,
   ];
 }
 
@@ -2169,6 +2626,7 @@ typedef $$QuranTableCreateCompanionBuilder =
       required int ayahNumber,
       Value<int?> juzNumber,
       Value<int?> hizbNumber,
+      Value<int?> pageNumber,
       required String verseText,
       Value<String?> translation,
       Value<String> reading,
@@ -2180,6 +2638,7 @@ typedef $$QuranTableUpdateCompanionBuilder =
       Value<int> ayahNumber,
       Value<int?> juzNumber,
       Value<int?> hizbNumber,
+      Value<int?> pageNumber,
       Value<String> verseText,
       Value<String?> translation,
       Value<String> reading,
@@ -2215,6 +2674,11 @@ class $$QuranTableFilterComposer extends Composer<_$AppDatabase, $QuranTable> {
 
   ColumnFilters<int> get hizbNumber => $composableBuilder(
     column: $table.hizbNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2268,6 +2732,11 @@ class $$QuranTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get verseText => $composableBuilder(
     column: $table.verseText,
     builder: (column) => ColumnOrderings(column),
@@ -2311,6 +2780,11 @@ class $$QuranTableAnnotationComposer
 
   GeneratedColumn<int> get hizbNumber => $composableBuilder(
     column: $table.hizbNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get pageNumber => $composableBuilder(
+    column: $table.pageNumber,
     builder: (column) => column,
   );
 
@@ -2359,6 +2833,7 @@ class $$QuranTableTableManager
                 Value<int> ayahNumber = const Value.absent(),
                 Value<int?> juzNumber = const Value.absent(),
                 Value<int?> hizbNumber = const Value.absent(),
+                Value<int?> pageNumber = const Value.absent(),
                 Value<String> verseText = const Value.absent(),
                 Value<String?> translation = const Value.absent(),
                 Value<String> reading = const Value.absent(),
@@ -2368,6 +2843,7 @@ class $$QuranTableTableManager
                 ayahNumber: ayahNumber,
                 juzNumber: juzNumber,
                 hizbNumber: hizbNumber,
+                pageNumber: pageNumber,
                 verseText: verseText,
                 translation: translation,
                 reading: reading,
@@ -2379,6 +2855,7 @@ class $$QuranTableTableManager
                 required int ayahNumber,
                 Value<int?> juzNumber = const Value.absent(),
                 Value<int?> hizbNumber = const Value.absent(),
+                Value<int?> pageNumber = const Value.absent(),
                 required String verseText,
                 Value<String?> translation = const Value.absent(),
                 Value<String> reading = const Value.absent(),
@@ -2388,6 +2865,7 @@ class $$QuranTableTableManager
                 ayahNumber: ayahNumber,
                 juzNumber: juzNumber,
                 hizbNumber: hizbNumber,
+                pageNumber: pageNumber,
                 verseText: verseText,
                 translation: translation,
                 reading: reading,
@@ -3315,6 +3793,223 @@ typedef $$AllahNamesTableProcessedTableManager =
       AllahName,
       PrefetchHooks Function()
     >;
+typedef $$KhatmaPlansTableCreateCompanionBuilder =
+    KhatmaPlansCompanion Function({
+      Value<int> id,
+      required String title,
+      required DateTime startDate,
+      required int targetDays,
+      Value<int> progressAyahs,
+      Value<bool> isActive,
+    });
+typedef $$KhatmaPlansTableUpdateCompanionBuilder =
+    KhatmaPlansCompanion Function({
+      Value<int> id,
+      Value<String> title,
+      Value<DateTime> startDate,
+      Value<int> targetDays,
+      Value<int> progressAyahs,
+      Value<bool> isActive,
+    });
+
+class $$KhatmaPlansTableFilterComposer
+    extends Composer<_$AppDatabase, $KhatmaPlansTable> {
+  $$KhatmaPlansTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetDays => $composableBuilder(
+    column: $table.targetDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get progressAyahs => $composableBuilder(
+    column: $table.progressAyahs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$KhatmaPlansTableOrderingComposer
+    extends Composer<_$AppDatabase, $KhatmaPlansTable> {
+  $$KhatmaPlansTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get targetDays => $composableBuilder(
+    column: $table.targetDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get progressAyahs => $composableBuilder(
+    column: $table.progressAyahs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$KhatmaPlansTableAnnotationComposer
+    extends Composer<_$AppDatabase, $KhatmaPlansTable> {
+  $$KhatmaPlansTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<int> get targetDays => $composableBuilder(
+    column: $table.targetDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get progressAyahs => $composableBuilder(
+    column: $table.progressAyahs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+}
+
+class $$KhatmaPlansTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $KhatmaPlansTable,
+          KhatmaPlan,
+          $$KhatmaPlansTableFilterComposer,
+          $$KhatmaPlansTableOrderingComposer,
+          $$KhatmaPlansTableAnnotationComposer,
+          $$KhatmaPlansTableCreateCompanionBuilder,
+          $$KhatmaPlansTableUpdateCompanionBuilder,
+          (
+            KhatmaPlan,
+            BaseReferences<_$AppDatabase, $KhatmaPlansTable, KhatmaPlan>,
+          ),
+          KhatmaPlan,
+          PrefetchHooks Function()
+        > {
+  $$KhatmaPlansTableTableManager(_$AppDatabase db, $KhatmaPlansTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$KhatmaPlansTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$KhatmaPlansTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$KhatmaPlansTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime> startDate = const Value.absent(),
+                Value<int> targetDays = const Value.absent(),
+                Value<int> progressAyahs = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+              }) => KhatmaPlansCompanion(
+                id: id,
+                title: title,
+                startDate: startDate,
+                targetDays: targetDays,
+                progressAyahs: progressAyahs,
+                isActive: isActive,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String title,
+                required DateTime startDate,
+                required int targetDays,
+                Value<int> progressAyahs = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+              }) => KhatmaPlansCompanion.insert(
+                id: id,
+                title: title,
+                startDate: startDate,
+                targetDays: targetDays,
+                progressAyahs: progressAyahs,
+                isActive: isActive,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$KhatmaPlansTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $KhatmaPlansTable,
+      KhatmaPlan,
+      $$KhatmaPlansTableFilterComposer,
+      $$KhatmaPlansTableOrderingComposer,
+      $$KhatmaPlansTableAnnotationComposer,
+      $$KhatmaPlansTableCreateCompanionBuilder,
+      $$KhatmaPlansTableUpdateCompanionBuilder,
+      (
+        KhatmaPlan,
+        BaseReferences<_$AppDatabase, $KhatmaPlansTable, KhatmaPlan>,
+      ),
+      KhatmaPlan,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3331,4 +4026,6 @@ class $AppDatabaseManager {
       $$BookmarksTableTableManager(_db, _db.bookmarks);
   $$AllahNamesTableTableManager get allahNames =>
       $$AllahNamesTableTableManager(_db, _db.allahNames);
+  $$KhatmaPlansTableTableManager get khatmaPlans =>
+      $$KhatmaPlansTableTableManager(_db, _db.khatmaPlans);
 }

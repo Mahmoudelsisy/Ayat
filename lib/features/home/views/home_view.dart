@@ -14,6 +14,7 @@ import '../../calendar/views/calendar_screen.dart';
 import '../../prayer_times/views/travel_mode_screen.dart';
 import '../../audio/views/audio_comparison_screen.dart';
 import 'allah_names_screen.dart';
+import 'khatma_planner_screen.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -153,6 +154,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _buildQuickAction(context, 'التقويم الهجري والمناسبات', Icons.calendar_today, Colors.teal, destination: const CalendarScreen()),
           _buildQuickAction(context, 'مقارنة القراء', Icons.compare, Colors.brown, destination: const AudioComparisonScreen()),
           _buildQuickAction(context, 'أسماء الله الحسنى', Icons.auto_awesome, Colors.amber, destination: const AllahNamesScreen()),
+          _buildQuickAction(context, 'مخطط الختمة', Icons.edit_calendar, Colors.deepOrange, destination: const KhatmaPlannerScreen()),
           _buildQuickAction(context, 'المرجعيات', Icons.bookmark, Colors.red, destination: const BookmarksScreen()),
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),

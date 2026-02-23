@@ -7,4 +7,6 @@ final availableFonts = [
   'Amiri',
   'Katibeh',
   'Lateef',
+  'Reem Kufi',
+  'Aref Ruqaa',
 ];

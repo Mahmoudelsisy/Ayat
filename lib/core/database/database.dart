@@ -14,6 +14,7 @@ class Quran extends Table {
   IntColumn get ayahNumber => integer()();
   IntColumn get juzNumber => integer().nullable()();
   IntColumn get hizbNumber => integer().nullable()();
+  IntColumn get pageNumber => integer().nullable()();
   TextColumn get verseText => text()();
   TextColumn get translation => text().nullable()();
   TextColumn get reading => text().withDefault(const Constant('hafs'))();
@@ -56,7 +57,16 @@ class AllahNames extends Table {
   TextColumn get meaning => text()();
 }
 
-@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames])
+class KhatmaPlans extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()();
+  DateTimeColumn get startDate => dateTime()();
+  IntColumn get targetDays => integer()();
+  IntColumn get progressAyahs => integer().withDefault(const Constant(0))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+}
+
+@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames, KhatmaPlans])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

@@ -43,6 +43,7 @@ class DataDownloadService {
                 ayahNumber: ayah['numberInSurah'] as int,
                 juzNumber: Value(ayah['juz'] as int),
                 hizbNumber: Value(ayah['hizbQuarter'] as int),
+                pageNumber: Value(ayah['page'] as int),
                 verseText: ayah['text'] as String,
               )
           ]);

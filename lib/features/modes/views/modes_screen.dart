@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../../core/services/notification_service.dart';
+import 'itikaf_screen.dart';
 
 class ModesScreen extends ConsumerStatefulWidget {
   const ModesScreen({super.key});
@@ -15,7 +16,6 @@ class _ModesScreenState extends ConsumerState<ModesScreen> {
   Timer? _qiyamTimer;
   int _secondsElapsed = 0;
 
-  bool _isKhalwaMode = false;
 
   void _toggleQiyam() {
     setState(() {
@@ -43,10 +43,7 @@ class _ModesScreenState extends ConsumerState<ModesScreen> {
   }
 
   void _toggleKhalwa() {
-    setState(() {
-      _isKhalwaMode = !_isKhalwaMode;
-      // In a real app, this would use a platform channel to enable DND
-    });
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ItikafScreen()));
   }
 
   String _formatTime(int seconds) {
@@ -74,13 +71,12 @@ class _ModesScreenState extends ConsumerState<ModesScreen> {
           ),
           const SizedBox(height: 20),
           _buildModeCard(
-            title: 'وضع الخلوة',
+            title: 'وضع الاعتكاف / الخلوة',
             description: 'تركيز كامل مع ذكر متكرر ومنع الإزعاج',
             icon: Icons.self_improvement,
             color: Colors.teal,
-            isActive: _isKhalwaMode,
+            isActive: false,
             onToggle: _toggleKhalwa,
-            extra: _isKhalwaMode ? const Text('وضع الخلوة نشط... ذكر متكرر يعمل في الخلفية', style: TextStyle(fontStyle: FontStyle.italic)) : null,
           ),
         ],
       ),

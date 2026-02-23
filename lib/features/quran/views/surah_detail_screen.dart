@@ -10,6 +10,7 @@ import '../../audio/providers/audio_provider.dart';
 import '../../../core/services/audio_download_service.dart';
 import '../../../shared/providers/font_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/mushaf_view.dart';
 
 enum QuranFilterType { surah, juz, hizb }
 
@@ -63,6 +64,7 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
+  bool _isMushafMode = false;
   int? _currentAyahIndex;
   bool _isDownloaded = false;
   double _downloadProgress = 0;
@@ -267,9 +269,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         title: Text(widget.surahName),
         actions: [
           IconButton(
-            icon: const Icon(Icons.font_download),
-            onPressed: () => _showFontSelection(),
+            icon: Icon(_isMushafMode ? Icons.list : Icons.menu_book),
+            onPressed: () => setState(() => _isMushafMode = !_isMushafMode),
           ),
+          if (!_isMushafMode)
+            IconButton(
+              icon: const Icon(Icons.font_download),
+              onPressed: () => _showFontSelection(),
+            ),
           if (widget.surahNumber != null && !_isDownloaded)
             _isDownloading
                 ? Center(
@@ -296,7 +303,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           ),
         ],
       ),
-      body: ayahsAsync.when(
+      body: _isMushafMode && widget.surahNumber != null
+          ? MushafView(surahNumber: widget.surahNumber!)
+          : ayahsAsync.when(
         data: (ayahs) => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: ayahs.length,
