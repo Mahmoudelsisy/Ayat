@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
+import '../../../core/database/database.dart';
 import 'package:drift/drift.dart' as drift hide Column;
 import 'package:hijri/hijri_calendar.dart';
 import '../../quran/views/surah_detail_screen.dart';
@@ -19,7 +20,13 @@ final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final countExp = db.userProgress.id.count();
   final query = db.selectOnly(db.userProgress)..addColumns([countExp]);
   final result = await query.getSingle();
-  return result.read(countExp) ?? 0;
+  return result.read(countExp) as int? ?? 0;
+});
+
+final randomDuaProvider = FutureProvider<AzkarData?>((ref) async {
+  final db = ref.read(databaseProvider);
+  final query = db.select(db.azkar)..orderBy([(t) => drift.OrderingTerm.random()])..limit(1);
+  return await query.getSingleOrNull();
 });
 
 class HomeView extends ConsumerStatefulWidget {
@@ -109,6 +116,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
             _buildLastReadCard(context, lastSurahNum, lastSurahName!),
             const SizedBox(height: 20),
           ],
+          _buildDuaOfDay(ref),
+          const SizedBox(height: 20),
           _buildCommitmentStats(),
           const SizedBox(height: 20),
           Card(
@@ -225,6 +234,39 @@ class _HomeViewState extends ConsumerState<HomeView> {
             Text(
               _formatDuration(_timeLeft),
               style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDuaOfDay(WidgetRef ref) {
+    final duaAsync = ref.watch(randomDuaProvider);
+    return Card(
+      elevation: 0,
+      color: Colors.amber.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15), side: const BorderSide(color: Colors.amber)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.format_quote, color: Colors.amber),
+                SizedBox(width: 10),
+                Text('دعاء اليوم', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            duaAsync.when(
+              data: (dua) => Text(
+                dua?.zikrText ?? 'اللهم اهدنا فيمن هديت',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, height: 1.5, fontStyle: FontStyle.italic),
+              ),
+              loading: () => const CircularProgressIndicator(),
+              error: (err, stack) => const Text('سبحان الله وبحمده'),
             ),
           ],
         ),

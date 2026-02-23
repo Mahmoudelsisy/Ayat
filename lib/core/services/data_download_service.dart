@@ -9,9 +9,10 @@ class DataDownloadService {
   DataDownloadService(this.db);
 
   Future<void> downloadAllData(Function(double) onProgress) async {
-    await downloadQuran(onProgress);
-    await downloadTafsir("al_sa'dy.json", 'saadi', (p) => onProgress(0.7 + (p * 0.1)));
-    await downloadTafsir("ebn_katheer.json", 'ibn_kathir', (p) => onProgress(0.8 + (p * 0.1)));
+    await downloadQuran((p) => onProgress(p * 0.7));
+    await downloadTafsir("al_sa'dy.json", 'saadi', (p) => onProgress(0.7 + (p * 0.07)));
+    await downloadTafsir("ebn_katheer.json", 'ibn_kathir', (p) => onProgress(0.77 + (p * 0.07)));
+    await downloadTafsir("ma'any_elkalemat.json", 'meanings', (p) => onProgress(0.84 + (p * 0.06)));
     await downloadAzkar((p) => onProgress(0.9 + (p * 0.05)));
     await downloadAllahNames((p) => onProgress(0.95 + (p * 0.05)));
   }
@@ -19,7 +20,10 @@ class DataDownloadService {
   Future<void> downloadQuran(Function(double) onProgress) async {
     // Check if data already exists
     final count = await (db.select(db.quran)..limit(1)).get();
-    if (count.isNotEmpty) return;
+    if (count.isNotEmpty) {
+      onProgress(1.0);
+      return;
+    }
 
     final response = await http.get(Uri.parse('http://api.alquran.cloud/v1/quran/quran-uthmani'));
     if (response.statusCode == 200) {
@@ -43,7 +47,7 @@ class DataDownloadService {
               )
           ]);
         });
-        onProgress((i + 1) / surahs.length * 0.7); // Quran is 70% of total
+        onProgress((i + 1) / surahs.length);
       }
     }
   }

@@ -365,6 +365,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                                     items: const [
                                       DropdownMenuItem(value: 'saadi', child: Text('السعدي')),
                                       DropdownMenuItem(value: 'ibn_kathir', child: Text('ابن كثير')),
+                                      DropdownMenuItem(value: 'meanings', child: Text('معاني الكلمات')),
                                     ],
                                     onChanged: (val) {
                                       if (val != null) {

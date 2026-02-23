@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
+import '../../../core/services/notification_service.dart';
 
 class ModesScreen extends ConsumerStatefulWidget {
   const ModesScreen({super.key});
@@ -24,10 +25,21 @@ class _ModesScreenState extends ConsumerState<ModesScreen> {
         _qiyamTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           setState(() => _secondsElapsed++);
         });
+        _scheduleQiyamReminder();
       } else {
         _qiyamTimer?.cancel();
       }
     });
+  }
+
+  void _scheduleQiyamReminder() {
+    NotificationService().scheduleDailyNotification(
+      200,
+      'موعد قيام الليل',
+      'تذكير بصلاة قيام الليل، شرف المؤمن قيامه بالليل',
+      2, // 2 AM
+      0,
+    );
   }
 
   void _toggleKhalwa() {

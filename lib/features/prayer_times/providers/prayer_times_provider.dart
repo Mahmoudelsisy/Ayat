@@ -2,10 +2,12 @@ import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/notification_service.dart';
+import 'prayer_settings_provider.dart';
 
 final prayerTimesProvider = FutureProvider<PrayerTimes>((ref) async {
+  final settings = ref.watch(prayerSettingsProvider);
   final service = PrayerTimesService();
-  final times = await service.getPrayerTimes();
+  final times = await service.getPrayerTimes(settings: settings);
   await service.schedulePrayerNotifications(times);
   return times;
 });
@@ -35,11 +37,15 @@ class PrayerTimesService {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<PrayerTimes> getPrayerTimes() async {
+  Future<PrayerTimes> getPrayerTimes({PrayerSettings? settings}) async {
     final position = await _determinePosition();
     final coordinates = Coordinates(position.latitude, position.longitude);
-    final params = CalculationMethod.umm_al_qura.getParameters();
-    params.madhab = Madhab.shafi;
+
+    final method = settings?.method ?? CalculationMethod.umm_al_qura;
+    final madhab = settings?.madhab ?? Madhab.shafi;
+
+    final params = method.getParameters();
+    params.madhab = madhab;
 
     final prayerTimes = PrayerTimes.today(coordinates, params);
     return prayerTimes;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TasbeehView extends StatefulWidget {
   const TasbeehView({super.key});
@@ -26,7 +27,10 @@ class _TasbeehViewState extends State<TasbeehView> {
             ),
             const SizedBox(height: 40),
             GestureDetector(
-              onTap: () => setState(() => _counter++),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                setState(() => _counter++);
+              },
               child: Container(
                 width: 200,
                 height: 200,

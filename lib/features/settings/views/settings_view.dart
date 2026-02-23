@@ -1,9 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
+import '../../prayer_times/providers/prayer_settings_provider.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
+
+  void _showCalculationMethodDialog(BuildContext context, WidgetRef ref) {
+    final methods = {
+      'umm_al_qura': 'أم القرى',
+      'muslim_world_league': 'رابطة العالم الإسلامي',
+      'egyptian': 'الهيئة المصرية العامة للمساحة',
+      'karachi': 'جامعة العلوم الإسلامية بكراتشي',
+      'dubai': 'دبي',
+      'kuwait': 'الكويت',
+      'qatar': 'قطر',
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('طريقة الحساب'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: methods.entries.map((e) => ListTile(
+              title: Text(e.value),
+              onTap: () {
+                final prefs = ref.read(sharedPreferencesProvider);
+                prefs.setString('prayer_method', e.key);
+                ref.invalidate(prayerSettingsProvider);
+                Navigator.pop(context);
+              },
+            )).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMadhabDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('المذهب'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('شافعي، مالكي، حنبلي'),
+              onTap: () {
+                final prefs = ref.read(sharedPreferencesProvider);
+                prefs.setString('prayer_madhab', 'shafi');
+                ref.invalidate(prayerSettingsProvider);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('حنفي'),
+              onTap: () {
+                final prefs = ref.read(sharedPreferencesProvider);
+                prefs.setString('prayer_madhab', 'hanafi');
+                ref.invalidate(prayerSettingsProvider);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,6 +79,18 @@ class SettingsView extends ConsumerWidget {
       appBar: AppBar(title: const Text('الإعدادات')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.access_time),
+            title: const Text('طريقة حساب الصلاة'),
+            subtitle: const Text('اضغط للتغيير'),
+            onTap: () => _showCalculationMethodDialog(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.rule),
+            title: const Text('المذهب (العصر)'),
+            subtitle: const Text('اضغط للتغيير'),
+            onTap: () => _showMadhabDialog(context, ref),
+          ),
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('الملف الشخصي'),
