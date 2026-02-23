@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
 class ItikafScreen extends ConsumerStatefulWidget {
   const ItikafScreen({super.key});
@@ -14,8 +15,29 @@ class _ItikafScreenState extends ConsumerState<ItikafScreen> {
     'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير',
     'أستغفر الله وأتوب إليه',
     'اللهم صل وسلم على نبينا محمد',
+    'لا حول ولا قوة إلا بالله العلي العظيم',
+    'سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر',
   ];
   int _currentIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % _zikrs.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -16,6 +16,7 @@ import '../../audio/views/audio_comparison_screen.dart';
 import 'allah_names_screen.dart';
 import 'khatma_planner_screen.dart';
 import '../../stats/views/achievements_screen.dart';
+import '../../modes/views/ramadan_view.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -209,6 +210,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           const SizedBox(height: 20),
           _buildRamadanCountdown(),
           const SizedBox(height: 20),
+          _buildQuickAction(context, 'وضع رمضان (إفطار، ختمة، أذكار)', Icons.star, Colors.indigo, destination: const RamadanView()),
           _buildQuickAction(context, 'الإحصائيات والتقدم', Icons.bar_chart, Colors.blue, destination: const StatsScreen()),
           _buildQuickAction(context, 'وضع السفر (قصر الصلاة)', Icons.flight_takeoff, Colors.blueAccent, destination: const TravelModeScreen()),
           _buildQuickAction(context, 'التقويم الهجري والمناسبات', Icons.calendar_today, Colors.teal, destination: const CalendarScreen()),
