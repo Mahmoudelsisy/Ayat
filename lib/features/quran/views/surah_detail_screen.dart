@@ -65,6 +65,7 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
+  bool _isParallelMode = false;
   LoopMode _loopMode = LoopMode.off;
   int _repeatCount = 1;
   int _currentRepeatIndex = 0;
@@ -325,11 +326,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     final ayahsAsync = ref.watch(quranContentProvider(_currentFilter));
 
     final selectedFont = ref.watch(selectedFontProvider);
+    final quranFontSize = ref.watch(quranFontSizeProvider);
+    final tafsirFontSize = ref.watch(tafsirFontSizeProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.surahName),
         actions: [
+          IconButton(
+            icon: Icon(_isParallelMode ? Icons.vertical_split : Icons.vertical_split_outlined),
+            onPressed: () => setState(() => _isParallelMode = !_isParallelMode),
+            tooltip: 'وضع التوازي (تفسير)',
+          ),
           IconButton(
             icon: Icon(_isMushafMode ? Icons.list : Icons.menu_book),
             onPressed: () => setState(() => _isMushafMode = !_isMushafMode),
@@ -481,7 +489,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               tafsirAsync.when(
                                 data: (data) => Text(
                                   data?.tafsirText.replaceAll(RegExp(r'<[^>]*>'), '') ?? 'لا يوجد تفسير متاح',
-                                  style: const TextStyle(fontSize: 18, height: 1.6),
+                                  style: TextStyle(fontSize: tafsirFontSize + 2, height: 1.6),
                                   textAlign: TextAlign.right,
                                 ),
                                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -503,8 +511,25 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     Text(
                       ayah.verseText,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.getFont(selectedFont, fontSize: 24, height: 2),
+                      style: GoogleFonts.getFont(selectedFont, fontSize: quranFontSize, height: 2),
                     ),
+                    if (_isParallelMode)
+                      Consumer(builder: (context, ref, child) {
+                        final type = ref.watch(selectedTafsirTypeProvider);
+                        final tafsirAsync = ref.watch(surahTafsirProvider(TafsirParams(ayah.surahNumber, 0, type: type)));
+                        return tafsirAsync.when(
+                          data: (map) => Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              map[ayah.ayahNumber]?.replaceAll(RegExp(r'<[^>]*>'), '') ?? '',
+                              style: TextStyle(fontSize: tafsirFontSize, color: Colors.blueGrey, height: 1.5),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                          loading: () => const SizedBox(),
+                          error: (e, s) => const SizedBox(),
+                        );
+                      }),
                     const Divider(),
                   ],
                 ),

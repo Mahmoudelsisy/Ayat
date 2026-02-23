@@ -33,3 +33,14 @@ final tafsirProvider = FutureProvider.family<Tafsir?, TafsirParams>((ref, params
             t.type.equals(params.type)))
       .getSingleOrNull();
 });
+
+final surahTafsirProvider = FutureProvider.family<Map<int, String>, TafsirParams>((ref, params) async {
+  final db = ref.read(databaseProvider);
+  final results = await (db.select(db.tafsirs)
+        ..where((t) =>
+            t.surahNumber.equals(params.surahNumber) &
+            t.type.equals(params.type)))
+      .get();
+
+  return {for (var t in results) t.ayahNumber: t.tafsirText};
+});

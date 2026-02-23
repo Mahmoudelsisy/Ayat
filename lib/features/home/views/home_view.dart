@@ -89,14 +89,31 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final count = await ref.read(readAyahsCountProvider.future);
 
     if (count >= 100) {
-      final existing = await (db.select(db.achievements)..where((t) => t.title.equals('قارئ مجتهد'))).get();
-      if (existing.isEmpty) {
-        await db.into(db.achievements).insert(AchievementsCompanion.insert(
-          title: 'قارئ مجتهد',
-          description: 'قرأت أكثر من 100 آية',
-          icon: 'star',
-        ));
-      }
+      _awardAchievement(db, 'قارئ مجتهد', 'قرأت أكثر من 100 آية', 'star');
+    }
+    if (count >= 500) {
+      _awardAchievement(db, 'خادم القرآن', 'قرأت أكثر من 500 آية', 'book');
+    }
+
+    final streak = await ref.read(currentStreakProvider.future);
+    if (streak >= 7) {
+      _awardAchievement(db, 'الالتزام الأسبوعي', 'حافظت على وردك لـ 7 أيام متتالية', 'fire');
+    }
+
+    final fastingCount = await (db.select(db.fastingTracking)..limit(10)).get();
+    if (fastingCount.length >= 5) {
+      _awardAchievement(db, 'الصائم القائم', 'وثقت صيام 5 أيام', 'timer');
+    }
+  }
+
+  Future<void> _awardAchievement(AppDatabase db, String title, String desc, String icon) async {
+    final existing = await (db.select(db.achievements)..where((t) => t.title.equals(title))).get();
+    if (existing.isEmpty) {
+      await db.into(db.achievements).insert(AchievementsCompanion.insert(
+            title: title,
+            description: desc,
+            icon: icon,
+          ));
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'shared/themes/app_theme.dart';
 import 'core/database/database.dart';
+import 'dart:math';
 import 'core/services/data_download_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/auth_service.dart';
@@ -128,9 +129,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     }
 
     if (mounted) {
+      _scheduleDailyReminders();
       // Navigate to Home
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  }
+
+  Future<void> _scheduleDailyReminders() async {
+    final db = ref.read(databaseProvider);
+    final azkar = await (db.select(db.azkar)..limit(100)).get();
+    if (azkar.isNotEmpty) {
+      final randomZikr = azkar[Random().nextInt(azkar.length)];
+      NotificationService().scheduleDailyNotification(
+        1001,
+        'ذكر اليوم',
+        randomZikr.zikrText,
+        8, // 8 AM
+        30,
       );
     }
   }

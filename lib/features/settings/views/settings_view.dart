@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import '../../prayer_times/providers/prayer_settings_provider.dart';
+import '../../../shared/providers/font_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
 import '../../../core/services/data_download_service.dart';
 
@@ -178,6 +179,8 @@ class SettingsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final quranFontSize = ref.watch(quranFontSizeProvider);
+    final tafsirFontSize = ref.watch(tafsirFontSizeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('الإعدادات')),
@@ -244,6 +247,26 @@ class SettingsView extends ConsumerWidget {
             title: const Text('رواية القراءة'),
             subtitle: const Text('حفص عن عاصم'),
             onTap: () => _showReadingSelection(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.format_size),
+            title: const Text('حجم خط القرآن'),
+            subtitle: Slider(
+              value: quranFontSize,
+              min: 16,
+              max: 48,
+              onChanged: (val) => ref.read(quranFontSizeProvider.notifier).state = val,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.text_fields),
+            title: const Text('حجم خط التفسير'),
+            subtitle: Slider(
+              value: tafsirFontSize,
+              min: 12,
+              max: 32,
+              onChanged: (val) => ref.read(tafsirFontSizeProvider.notifier).state = val,
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.language),
