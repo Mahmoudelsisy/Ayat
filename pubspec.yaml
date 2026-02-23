@@ -54,6 +54,7 @@ dependencies:
   timezone: ^0.9.4
   flutter_timezone: ^2.0.0
   local_auth: ^2.3.0
+  fl_chart: ^0.70.2
 
 dev_dependencies:
   flutter_test:

@@ -39,7 +39,15 @@ class UserProgress extends Table {
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress])
+class Bookmarks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get surahNumber => integer()();
+  IntColumn get ayahNumber => integer()();
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

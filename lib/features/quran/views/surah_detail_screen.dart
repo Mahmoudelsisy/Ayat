@@ -6,6 +6,8 @@ import '../../../core/database/database.dart';
 import '../../tafsir/providers/tafsir_provider.dart';
 import '../../audio/providers/audio_provider.dart';
 import '../../../core/services/audio_download_service.dart';
+import '../../../shared/providers/font_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final surahContentProvider = FutureProvider.family<List<QuranData>, int>((ref, surahNumber) async {
   final db = ref.read(databaseProvider);
@@ -58,6 +60,13 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     if (mounted) {
       setState(() => _isDownloaded = downloaded);
     }
+    _saveLastRead();
+  }
+
+  Future<void> _saveLastRead() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setInt('last_surah_number', widget.surahNumber);
+    await prefs.setString('last_surah_name', widget.surahName);
   }
 
   @override
@@ -143,6 +152,34 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     }
   }
 
+  void _showFontSelection() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final selected = ref.watch(selectedFontProvider);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('اختر الخط', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              ...availableFonts.map((font) => ListTile(
+                    title: Text(font, style: GoogleFonts.getFont(font)),
+                    trailing: selected == font ? const Icon(Icons.check, color: Colors.green) : null,
+                    onTap: () {
+                      ref.read(selectedFontProvider.notifier).state = font;
+                      Navigator.pop(context);
+                    },
+                  )),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   void _showReciterSelection() {
     showModalBottomSheet(
       context: context,
@@ -179,10 +216,16 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   Widget build(BuildContext context) {
     final ayahsAsync = ref.watch(surahContentProvider(widget.surahNumber));
 
+    final selectedFont = ref.watch(selectedFontProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.surahName),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.font_download),
+            onPressed: () => _showFontSelection(),
+          ),
           if (!_isDownloaded)
             _isDownloading
                 ? Center(
@@ -251,6 +294,20 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.bookmark_border),
+                                    onPressed: () async {
+                                      final db = ref.read(databaseProvider);
+                                      await db.into(db.bookmarks).insert(BookmarksCompanion.insert(
+                                            surahNumber: ayah.surahNumber,
+                                            ayahNumber: ayah.ayahNumber,
+                                          ));
+                                      if (mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت الإضافة للمرجعية')));
+                                      }
+                                    },
+                                  ),
                                   Text('تفسير الآية ${ayah.ayahNumber}',
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                                   DropdownButton<String>(
@@ -293,7 +350,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     Text(
                       ayah.verseText,
                       textAlign: TextAlign.right,
-                      style: const TextStyle(fontSize: 22, height: 2, fontFamily: 'Cairo'),
+                      style: GoogleFonts.getFont(selectedFont, fontSize: 24, height: 2),
                     ),
                     const Divider(),
                   ],

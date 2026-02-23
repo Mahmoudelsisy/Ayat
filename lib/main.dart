@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'shared/themes/app_theme.dart';
 import 'core/database/database.dart';
 import 'core/services/data_download_service.dart';
@@ -14,12 +15,20 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
+  final sharedPrefs = await SharedPreferences.getInstance();
   runApp(
-    const ProviderScope(
-      child: AyatApp(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+      ],
+      child: const AyatApp(),
     ),
   );
 }

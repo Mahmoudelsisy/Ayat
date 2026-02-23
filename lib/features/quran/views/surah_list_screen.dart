@@ -29,6 +29,31 @@ class QuranSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          const TabBar(
+            labelColor: Colors.green,
+            tabs: [
+              Tab(text: 'في الآيات'),
+              Tab(text: 'في التفاسير'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildQuranSearchResults(),
+                _buildTafsirSearchResults(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuranSearchResults() {
     return Consumer(builder: (context, ref, child) {
       final searchAsync = ref.watch(quranSearchProvider(query));
       return searchAsync.when(
@@ -45,7 +70,39 @@ class QuranSearchDelegate extends SearchDelegate {
                   MaterialPageRoute(
                     builder: (context) => SurahDetailScreen(
                       surahNumber: ayah.surahNumber,
-                      surahName: "سورة ${ayah.surahNumber}" // Temporary
+                      surahName: "سورة ${ayah.surahNumber}",
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('خطأ: $err')),
+      );
+    });
+  }
+
+  Widget _buildTafsirSearchResults() {
+    return Consumer(builder: (context, ref, child) {
+      final searchAsync = ref.watch(tafsirSearchProvider(query));
+      return searchAsync.when(
+        data: (results) => ListView.builder(
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            final result = results[index];
+            return ListTile(
+              title: Text(result.tafsirText.replaceAll(RegExp(r'<[^>]*>'), ''),
+                  maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.right),
+              subtitle: Text('سورة ${result.surahNumber} - آية ${result.ayahNumber} (${result.type})'),
+              onTap: () {
+                close(context, null);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SurahDetailScreen(
+                      surahNumber: result.surahNumber,
+                      surahName: "سورة ${result.surahNumber}",
                     ),
                   ),
                 );

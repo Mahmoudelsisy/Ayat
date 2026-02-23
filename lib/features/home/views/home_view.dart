@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import 'package:drift/drift.dart' as drift hide Column;
 import 'package:hijri/hijri_calendar.dart';
+import '../../quran/views/surah_detail_screen.dart';
 import '../../modes/views/modes_screen.dart';
+import '../../bookmarks/views/bookmarks_screen.dart';
+import '../../stats/views/stats_screen.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -21,11 +24,19 @@ class HomeView extends ConsumerWidget {
     final readCountAsync = ref.watch(readAyahsCountProvider);
     const totalAyahs = 6236;
 
+    final prefs = ref.watch(sharedPreferencesProvider);
+    final lastSurahNum = prefs.getInt('last_surah_number');
+    final lastSurahName = prefs.getString('last_surah_name');
+
     return Scaffold(
       appBar: AppBar(title: const Text('آيات')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (lastSurahNum != null) ...[
+            _buildLastReadCard(context, lastSurahNum, lastSurahName!),
+            const SizedBox(height: 20),
+          ],
           _buildCommitmentStats(),
           const SizedBox(height: 20),
           Card(
@@ -56,6 +67,8 @@ class HomeView extends ConsumerWidget {
           const SizedBox(height: 20),
           _buildRamadanCountdown(),
           const SizedBox(height: 20),
+          _buildQuickAction(context, 'الإحصائيات والتقدم', Icons.bar_chart, Colors.blue, destination: const StatsScreen()),
+          _buildQuickAction(context, 'المرجعيات', Icons.bookmark, Colors.red, destination: const BookmarksScreen()),
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),
           _buildQuickAction(context, 'أذكار المساء', Icons.nightlight_round, Colors.indigo),
@@ -121,6 +134,22 @@ class HomeView extends ConsumerWidget {
         Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
+    );
+  }
+
+  Widget _buildLastReadCard(BuildContext context, int number, String name) {
+    return Card(
+      color: Theme.of(context).primaryColor,
+      child: ListTile(
+        title: const Text('واصل القراءة', style: TextStyle(color: Colors.white70)),
+        subtitle: Text(name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        trailing: const Icon(Icons.play_arrow, color: Colors.white, size: 30),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SurahDetailScreen(surahNumber: number, surahName: name),
+          ));
+        },
+      ),
     );
   }
 
