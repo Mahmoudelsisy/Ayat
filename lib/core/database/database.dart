@@ -74,12 +74,66 @@ class Achievements extends Table {
   DateTimeColumn get dateEarned => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames, KhatmaPlans, Achievements])
+class FastingTracking extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get hYear => integer()();
+  IntColumn get hMonth => integer()();
+  IntColumn get hDay => integer()();
+  TextColumn get type => text()(); // e.g., 'Ramadan', 'Sunnah', 'Qada'
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+}
+
+class CalendarNotes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get hYear => integer()();
+  IntColumn get hMonth => integer()();
+  IntColumn get hDay => integer()();
+  TextColumn get note => text()();
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+}
+
+class DailyCommitment extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get date => dateTime()();
+  IntColumn get prayerCount => integer().withDefault(const Constant(0))();
+  BoolColumn get morningAzkar => boolean().withDefault(const Constant(false))();
+  BoolColumn get eveningAzkar => boolean().withDefault(const Constant(false))();
+}
+
+@DriftDatabase(tables: [
+  Quran,
+  Tafsirs,
+  Azkar,
+  UserProgress,
+  Bookmarks,
+  AllahNames,
+  KhatmaPlans,
+  Achievements,
+  FastingTracking,
+  CalendarNotes,
+  DailyCommitment
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(fastingTracking);
+            await m.createTable(calendarNotes);
+          }
+          if (from < 3) {
+            await m.createTable(dailyCommitment);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {

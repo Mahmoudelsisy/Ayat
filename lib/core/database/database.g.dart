@@ -2947,6 +2947,1152 @@ class AchievementsCompanion extends UpdateCompanion<Achievement> {
   }
 }
 
+class $FastingTrackingTable extends FastingTracking
+    with TableInfo<$FastingTrackingTable, FastingTrackingData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FastingTrackingTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _hYearMeta = const VerificationMeta('hYear');
+  @override
+  late final GeneratedColumn<int> hYear = GeneratedColumn<int>(
+    'h_year',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hMonthMeta = const VerificationMeta('hMonth');
+  @override
+  late final GeneratedColumn<int> hMonth = GeneratedColumn<int>(
+    'h_month',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hDayMeta = const VerificationMeta('hDay');
+  @override
+  late final GeneratedColumn<int> hDay = GeneratedColumn<int>(
+    'h_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    hYear,
+    hMonth,
+    hDay,
+    type,
+    timestamp,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fasting_tracking';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FastingTrackingData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('h_year')) {
+      context.handle(
+        _hYearMeta,
+        hYear.isAcceptableOrUnknown(data['h_year']!, _hYearMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hYearMeta);
+    }
+    if (data.containsKey('h_month')) {
+      context.handle(
+        _hMonthMeta,
+        hMonth.isAcceptableOrUnknown(data['h_month']!, _hMonthMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hMonthMeta);
+    }
+    if (data.containsKey('h_day')) {
+      context.handle(
+        _hDayMeta,
+        hDay.isAcceptableOrUnknown(data['h_day']!, _hDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hDayMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FastingTrackingData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FastingTrackingData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      hYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_year'],
+      )!,
+      hMonth: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_month'],
+      )!,
+      hDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_day'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+    );
+  }
+
+  @override
+  $FastingTrackingTable createAlias(String alias) {
+    return $FastingTrackingTable(attachedDatabase, alias);
+  }
+}
+
+class FastingTrackingData extends DataClass
+    implements Insertable<FastingTrackingData> {
+  final int id;
+  final int hYear;
+  final int hMonth;
+  final int hDay;
+  final String type;
+  final DateTime timestamp;
+  const FastingTrackingData({
+    required this.id,
+    required this.hYear,
+    required this.hMonth,
+    required this.hDay,
+    required this.type,
+    required this.timestamp,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['h_year'] = Variable<int>(hYear);
+    map['h_month'] = Variable<int>(hMonth);
+    map['h_day'] = Variable<int>(hDay);
+    map['type'] = Variable<String>(type);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  FastingTrackingCompanion toCompanion(bool nullToAbsent) {
+    return FastingTrackingCompanion(
+      id: Value(id),
+      hYear: Value(hYear),
+      hMonth: Value(hMonth),
+      hDay: Value(hDay),
+      type: Value(type),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory FastingTrackingData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FastingTrackingData(
+      id: serializer.fromJson<int>(json['id']),
+      hYear: serializer.fromJson<int>(json['hYear']),
+      hMonth: serializer.fromJson<int>(json['hMonth']),
+      hDay: serializer.fromJson<int>(json['hDay']),
+      type: serializer.fromJson<String>(json['type']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'hYear': serializer.toJson<int>(hYear),
+      'hMonth': serializer.toJson<int>(hMonth),
+      'hDay': serializer.toJson<int>(hDay),
+      'type': serializer.toJson<String>(type),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  FastingTrackingData copyWith({
+    int? id,
+    int? hYear,
+    int? hMonth,
+    int? hDay,
+    String? type,
+    DateTime? timestamp,
+  }) => FastingTrackingData(
+    id: id ?? this.id,
+    hYear: hYear ?? this.hYear,
+    hMonth: hMonth ?? this.hMonth,
+    hDay: hDay ?? this.hDay,
+    type: type ?? this.type,
+    timestamp: timestamp ?? this.timestamp,
+  );
+  FastingTrackingData copyWithCompanion(FastingTrackingCompanion data) {
+    return FastingTrackingData(
+      id: data.id.present ? data.id.value : this.id,
+      hYear: data.hYear.present ? data.hYear.value : this.hYear,
+      hMonth: data.hMonth.present ? data.hMonth.value : this.hMonth,
+      hDay: data.hDay.present ? data.hDay.value : this.hDay,
+      type: data.type.present ? data.type.value : this.type,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FastingTrackingData(')
+          ..write('id: $id, ')
+          ..write('hYear: $hYear, ')
+          ..write('hMonth: $hMonth, ')
+          ..write('hDay: $hDay, ')
+          ..write('type: $type, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, hYear, hMonth, hDay, type, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FastingTrackingData &&
+          other.id == this.id &&
+          other.hYear == this.hYear &&
+          other.hMonth == this.hMonth &&
+          other.hDay == this.hDay &&
+          other.type == this.type &&
+          other.timestamp == this.timestamp);
+}
+
+class FastingTrackingCompanion extends UpdateCompanion<FastingTrackingData> {
+  final Value<int> id;
+  final Value<int> hYear;
+  final Value<int> hMonth;
+  final Value<int> hDay;
+  final Value<String> type;
+  final Value<DateTime> timestamp;
+  const FastingTrackingCompanion({
+    this.id = const Value.absent(),
+    this.hYear = const Value.absent(),
+    this.hMonth = const Value.absent(),
+    this.hDay = const Value.absent(),
+    this.type = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  FastingTrackingCompanion.insert({
+    this.id = const Value.absent(),
+    required int hYear,
+    required int hMonth,
+    required int hDay,
+    required String type,
+    this.timestamp = const Value.absent(),
+  }) : hYear = Value(hYear),
+       hMonth = Value(hMonth),
+       hDay = Value(hDay),
+       type = Value(type);
+  static Insertable<FastingTrackingData> custom({
+    Expression<int>? id,
+    Expression<int>? hYear,
+    Expression<int>? hMonth,
+    Expression<int>? hDay,
+    Expression<String>? type,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (hYear != null) 'h_year': hYear,
+      if (hMonth != null) 'h_month': hMonth,
+      if (hDay != null) 'h_day': hDay,
+      if (type != null) 'type': type,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  FastingTrackingCompanion copyWith({
+    Value<int>? id,
+    Value<int>? hYear,
+    Value<int>? hMonth,
+    Value<int>? hDay,
+    Value<String>? type,
+    Value<DateTime>? timestamp,
+  }) {
+    return FastingTrackingCompanion(
+      id: id ?? this.id,
+      hYear: hYear ?? this.hYear,
+      hMonth: hMonth ?? this.hMonth,
+      hDay: hDay ?? this.hDay,
+      type: type ?? this.type,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (hYear.present) {
+      map['h_year'] = Variable<int>(hYear.value);
+    }
+    if (hMonth.present) {
+      map['h_month'] = Variable<int>(hMonth.value);
+    }
+    if (hDay.present) {
+      map['h_day'] = Variable<int>(hDay.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FastingTrackingCompanion(')
+          ..write('id: $id, ')
+          ..write('hYear: $hYear, ')
+          ..write('hMonth: $hMonth, ')
+          ..write('hDay: $hDay, ')
+          ..write('type: $type, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CalendarNotesTable extends CalendarNotes
+    with TableInfo<$CalendarNotesTable, CalendarNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CalendarNotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _hYearMeta = const VerificationMeta('hYear');
+  @override
+  late final GeneratedColumn<int> hYear = GeneratedColumn<int>(
+    'h_year',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hMonthMeta = const VerificationMeta('hMonth');
+  @override
+  late final GeneratedColumn<int> hMonth = GeneratedColumn<int>(
+    'h_month',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hDayMeta = const VerificationMeta('hDay');
+  @override
+  late final GeneratedColumn<int> hDay = GeneratedColumn<int>(
+    'h_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    hYear,
+    hMonth,
+    hDay,
+    note,
+    timestamp,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'calendar_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CalendarNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('h_year')) {
+      context.handle(
+        _hYearMeta,
+        hYear.isAcceptableOrUnknown(data['h_year']!, _hYearMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hYearMeta);
+    }
+    if (data.containsKey('h_month')) {
+      context.handle(
+        _hMonthMeta,
+        hMonth.isAcceptableOrUnknown(data['h_month']!, _hMonthMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hMonthMeta);
+    }
+    if (data.containsKey('h_day')) {
+      context.handle(
+        _hDayMeta,
+        hDay.isAcceptableOrUnknown(data['h_day']!, _hDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hDayMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CalendarNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CalendarNote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      hYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_year'],
+      )!,
+      hMonth: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_month'],
+      )!,
+      hDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}h_day'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+    );
+  }
+
+  @override
+  $CalendarNotesTable createAlias(String alias) {
+    return $CalendarNotesTable(attachedDatabase, alias);
+  }
+}
+
+class CalendarNote extends DataClass implements Insertable<CalendarNote> {
+  final int id;
+  final int hYear;
+  final int hMonth;
+  final int hDay;
+  final String note;
+  final DateTime timestamp;
+  const CalendarNote({
+    required this.id,
+    required this.hYear,
+    required this.hMonth,
+    required this.hDay,
+    required this.note,
+    required this.timestamp,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['h_year'] = Variable<int>(hYear);
+    map['h_month'] = Variable<int>(hMonth);
+    map['h_day'] = Variable<int>(hDay);
+    map['note'] = Variable<String>(note);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  CalendarNotesCompanion toCompanion(bool nullToAbsent) {
+    return CalendarNotesCompanion(
+      id: Value(id),
+      hYear: Value(hYear),
+      hMonth: Value(hMonth),
+      hDay: Value(hDay),
+      note: Value(note),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory CalendarNote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CalendarNote(
+      id: serializer.fromJson<int>(json['id']),
+      hYear: serializer.fromJson<int>(json['hYear']),
+      hMonth: serializer.fromJson<int>(json['hMonth']),
+      hDay: serializer.fromJson<int>(json['hDay']),
+      note: serializer.fromJson<String>(json['note']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'hYear': serializer.toJson<int>(hYear),
+      'hMonth': serializer.toJson<int>(hMonth),
+      'hDay': serializer.toJson<int>(hDay),
+      'note': serializer.toJson<String>(note),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  CalendarNote copyWith({
+    int? id,
+    int? hYear,
+    int? hMonth,
+    int? hDay,
+    String? note,
+    DateTime? timestamp,
+  }) => CalendarNote(
+    id: id ?? this.id,
+    hYear: hYear ?? this.hYear,
+    hMonth: hMonth ?? this.hMonth,
+    hDay: hDay ?? this.hDay,
+    note: note ?? this.note,
+    timestamp: timestamp ?? this.timestamp,
+  );
+  CalendarNote copyWithCompanion(CalendarNotesCompanion data) {
+    return CalendarNote(
+      id: data.id.present ? data.id.value : this.id,
+      hYear: data.hYear.present ? data.hYear.value : this.hYear,
+      hMonth: data.hMonth.present ? data.hMonth.value : this.hMonth,
+      hDay: data.hDay.present ? data.hDay.value : this.hDay,
+      note: data.note.present ? data.note.value : this.note,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarNote(')
+          ..write('id: $id, ')
+          ..write('hYear: $hYear, ')
+          ..write('hMonth: $hMonth, ')
+          ..write('hDay: $hDay, ')
+          ..write('note: $note, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, hYear, hMonth, hDay, note, timestamp);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CalendarNote &&
+          other.id == this.id &&
+          other.hYear == this.hYear &&
+          other.hMonth == this.hMonth &&
+          other.hDay == this.hDay &&
+          other.note == this.note &&
+          other.timestamp == this.timestamp);
+}
+
+class CalendarNotesCompanion extends UpdateCompanion<CalendarNote> {
+  final Value<int> id;
+  final Value<int> hYear;
+  final Value<int> hMonth;
+  final Value<int> hDay;
+  final Value<String> note;
+  final Value<DateTime> timestamp;
+  const CalendarNotesCompanion({
+    this.id = const Value.absent(),
+    this.hYear = const Value.absent(),
+    this.hMonth = const Value.absent(),
+    this.hDay = const Value.absent(),
+    this.note = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  CalendarNotesCompanion.insert({
+    this.id = const Value.absent(),
+    required int hYear,
+    required int hMonth,
+    required int hDay,
+    required String note,
+    this.timestamp = const Value.absent(),
+  }) : hYear = Value(hYear),
+       hMonth = Value(hMonth),
+       hDay = Value(hDay),
+       note = Value(note);
+  static Insertable<CalendarNote> custom({
+    Expression<int>? id,
+    Expression<int>? hYear,
+    Expression<int>? hMonth,
+    Expression<int>? hDay,
+    Expression<String>? note,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (hYear != null) 'h_year': hYear,
+      if (hMonth != null) 'h_month': hMonth,
+      if (hDay != null) 'h_day': hDay,
+      if (note != null) 'note': note,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  CalendarNotesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? hYear,
+    Value<int>? hMonth,
+    Value<int>? hDay,
+    Value<String>? note,
+    Value<DateTime>? timestamp,
+  }) {
+    return CalendarNotesCompanion(
+      id: id ?? this.id,
+      hYear: hYear ?? this.hYear,
+      hMonth: hMonth ?? this.hMonth,
+      hDay: hDay ?? this.hDay,
+      note: note ?? this.note,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (hYear.present) {
+      map['h_year'] = Variable<int>(hYear.value);
+    }
+    if (hMonth.present) {
+      map['h_month'] = Variable<int>(hMonth.value);
+    }
+    if (hDay.present) {
+      map['h_day'] = Variable<int>(hDay.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarNotesCompanion(')
+          ..write('id: $id, ')
+          ..write('hYear: $hYear, ')
+          ..write('hMonth: $hMonth, ')
+          ..write('hDay: $hDay, ')
+          ..write('note: $note, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DailyCommitmentTable extends DailyCommitment
+    with TableInfo<$DailyCommitmentTable, DailyCommitmentData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DailyCommitmentTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prayerCountMeta = const VerificationMeta(
+    'prayerCount',
+  );
+  @override
+  late final GeneratedColumn<int> prayerCount = GeneratedColumn<int>(
+    'prayer_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _morningAzkarMeta = const VerificationMeta(
+    'morningAzkar',
+  );
+  @override
+  late final GeneratedColumn<bool> morningAzkar = GeneratedColumn<bool>(
+    'morning_azkar',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("morning_azkar" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _eveningAzkarMeta = const VerificationMeta(
+    'eveningAzkar',
+  );
+  @override
+  late final GeneratedColumn<bool> eveningAzkar = GeneratedColumn<bool>(
+    'evening_azkar',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("evening_azkar" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    date,
+    prayerCount,
+    morningAzkar,
+    eveningAzkar,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'daily_commitment';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DailyCommitmentData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('prayer_count')) {
+      context.handle(
+        _prayerCountMeta,
+        prayerCount.isAcceptableOrUnknown(
+          data['prayer_count']!,
+          _prayerCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('morning_azkar')) {
+      context.handle(
+        _morningAzkarMeta,
+        morningAzkar.isAcceptableOrUnknown(
+          data['morning_azkar']!,
+          _morningAzkarMeta,
+        ),
+      );
+    }
+    if (data.containsKey('evening_azkar')) {
+      context.handle(
+        _eveningAzkarMeta,
+        eveningAzkar.isAcceptableOrUnknown(
+          data['evening_azkar']!,
+          _eveningAzkarMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DailyCommitmentData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DailyCommitmentData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      prayerCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prayer_count'],
+      )!,
+      morningAzkar: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}morning_azkar'],
+      )!,
+      eveningAzkar: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}evening_azkar'],
+      )!,
+    );
+  }
+
+  @override
+  $DailyCommitmentTable createAlias(String alias) {
+    return $DailyCommitmentTable(attachedDatabase, alias);
+  }
+}
+
+class DailyCommitmentData extends DataClass
+    implements Insertable<DailyCommitmentData> {
+  final int id;
+  final DateTime date;
+  final int prayerCount;
+  final bool morningAzkar;
+  final bool eveningAzkar;
+  const DailyCommitmentData({
+    required this.id,
+    required this.date,
+    required this.prayerCount,
+    required this.morningAzkar,
+    required this.eveningAzkar,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['date'] = Variable<DateTime>(date);
+    map['prayer_count'] = Variable<int>(prayerCount);
+    map['morning_azkar'] = Variable<bool>(morningAzkar);
+    map['evening_azkar'] = Variable<bool>(eveningAzkar);
+    return map;
+  }
+
+  DailyCommitmentCompanion toCompanion(bool nullToAbsent) {
+    return DailyCommitmentCompanion(
+      id: Value(id),
+      date: Value(date),
+      prayerCount: Value(prayerCount),
+      morningAzkar: Value(morningAzkar),
+      eveningAzkar: Value(eveningAzkar),
+    );
+  }
+
+  factory DailyCommitmentData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DailyCommitmentData(
+      id: serializer.fromJson<int>(json['id']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      prayerCount: serializer.fromJson<int>(json['prayerCount']),
+      morningAzkar: serializer.fromJson<bool>(json['morningAzkar']),
+      eveningAzkar: serializer.fromJson<bool>(json['eveningAzkar']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'date': serializer.toJson<DateTime>(date),
+      'prayerCount': serializer.toJson<int>(prayerCount),
+      'morningAzkar': serializer.toJson<bool>(morningAzkar),
+      'eveningAzkar': serializer.toJson<bool>(eveningAzkar),
+    };
+  }
+
+  DailyCommitmentData copyWith({
+    int? id,
+    DateTime? date,
+    int? prayerCount,
+    bool? morningAzkar,
+    bool? eveningAzkar,
+  }) => DailyCommitmentData(
+    id: id ?? this.id,
+    date: date ?? this.date,
+    prayerCount: prayerCount ?? this.prayerCount,
+    morningAzkar: morningAzkar ?? this.morningAzkar,
+    eveningAzkar: eveningAzkar ?? this.eveningAzkar,
+  );
+  DailyCommitmentData copyWithCompanion(DailyCommitmentCompanion data) {
+    return DailyCommitmentData(
+      id: data.id.present ? data.id.value : this.id,
+      date: data.date.present ? data.date.value : this.date,
+      prayerCount: data.prayerCount.present
+          ? data.prayerCount.value
+          : this.prayerCount,
+      morningAzkar: data.morningAzkar.present
+          ? data.morningAzkar.value
+          : this.morningAzkar,
+      eveningAzkar: data.eveningAzkar.present
+          ? data.eveningAzkar.value
+          : this.eveningAzkar,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailyCommitmentData(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('prayerCount: $prayerCount, ')
+          ..write('morningAzkar: $morningAzkar, ')
+          ..write('eveningAzkar: $eveningAzkar')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, date, prayerCount, morningAzkar, eveningAzkar);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DailyCommitmentData &&
+          other.id == this.id &&
+          other.date == this.date &&
+          other.prayerCount == this.prayerCount &&
+          other.morningAzkar == this.morningAzkar &&
+          other.eveningAzkar == this.eveningAzkar);
+}
+
+class DailyCommitmentCompanion extends UpdateCompanion<DailyCommitmentData> {
+  final Value<int> id;
+  final Value<DateTime> date;
+  final Value<int> prayerCount;
+  final Value<bool> morningAzkar;
+  final Value<bool> eveningAzkar;
+  const DailyCommitmentCompanion({
+    this.id = const Value.absent(),
+    this.date = const Value.absent(),
+    this.prayerCount = const Value.absent(),
+    this.morningAzkar = const Value.absent(),
+    this.eveningAzkar = const Value.absent(),
+  });
+  DailyCommitmentCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime date,
+    this.prayerCount = const Value.absent(),
+    this.morningAzkar = const Value.absent(),
+    this.eveningAzkar = const Value.absent(),
+  }) : date = Value(date);
+  static Insertable<DailyCommitmentData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? date,
+    Expression<int>? prayerCount,
+    Expression<bool>? morningAzkar,
+    Expression<bool>? eveningAzkar,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (date != null) 'date': date,
+      if (prayerCount != null) 'prayer_count': prayerCount,
+      if (morningAzkar != null) 'morning_azkar': morningAzkar,
+      if (eveningAzkar != null) 'evening_azkar': eveningAzkar,
+    });
+  }
+
+  DailyCommitmentCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? date,
+    Value<int>? prayerCount,
+    Value<bool>? morningAzkar,
+    Value<bool>? eveningAzkar,
+  }) {
+    return DailyCommitmentCompanion(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      prayerCount: prayerCount ?? this.prayerCount,
+      morningAzkar: morningAzkar ?? this.morningAzkar,
+      eveningAzkar: eveningAzkar ?? this.eveningAzkar,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (prayerCount.present) {
+      map['prayer_count'] = Variable<int>(prayerCount.value);
+    }
+    if (morningAzkar.present) {
+      map['morning_azkar'] = Variable<bool>(morningAzkar.value);
+    }
+    if (eveningAzkar.present) {
+      map['evening_azkar'] = Variable<bool>(eveningAzkar.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailyCommitmentCompanion(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('prayerCount: $prayerCount, ')
+          ..write('morningAzkar: $morningAzkar, ')
+          ..write('eveningAzkar: $eveningAzkar')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2958,6 +4104,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AllahNamesTable allahNames = $AllahNamesTable(this);
   late final $KhatmaPlansTable khatmaPlans = $KhatmaPlansTable(this);
   late final $AchievementsTable achievements = $AchievementsTable(this);
+  late final $FastingTrackingTable fastingTracking = $FastingTrackingTable(
+    this,
+  );
+  late final $CalendarNotesTable calendarNotes = $CalendarNotesTable(this);
+  late final $DailyCommitmentTable dailyCommitment = $DailyCommitmentTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2971,6 +4124,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     allahNames,
     khatmaPlans,
     achievements,
+    fastingTracking,
+    calendarNotes,
+    dailyCommitment,
   ];
 }
 
@@ -4563,6 +5719,652 @@ typedef $$AchievementsTableProcessedTableManager =
       Achievement,
       PrefetchHooks Function()
     >;
+typedef $$FastingTrackingTableCreateCompanionBuilder =
+    FastingTrackingCompanion Function({
+      Value<int> id,
+      required int hYear,
+      required int hMonth,
+      required int hDay,
+      required String type,
+      Value<DateTime> timestamp,
+    });
+typedef $$FastingTrackingTableUpdateCompanionBuilder =
+    FastingTrackingCompanion Function({
+      Value<int> id,
+      Value<int> hYear,
+      Value<int> hMonth,
+      Value<int> hDay,
+      Value<String> type,
+      Value<DateTime> timestamp,
+    });
+
+class $$FastingTrackingTableFilterComposer
+    extends Composer<_$AppDatabase, $FastingTrackingTable> {
+  $$FastingTrackingTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hYear => $composableBuilder(
+    column: $table.hYear,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hMonth => $composableBuilder(
+    column: $table.hMonth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hDay => $composableBuilder(
+    column: $table.hDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FastingTrackingTableOrderingComposer
+    extends Composer<_$AppDatabase, $FastingTrackingTable> {
+  $$FastingTrackingTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hYear => $composableBuilder(
+    column: $table.hYear,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hMonth => $composableBuilder(
+    column: $table.hMonth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hDay => $composableBuilder(
+    column: $table.hDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FastingTrackingTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FastingTrackingTable> {
+  $$FastingTrackingTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get hYear =>
+      $composableBuilder(column: $table.hYear, builder: (column) => column);
+
+  GeneratedColumn<int> get hMonth =>
+      $composableBuilder(column: $table.hMonth, builder: (column) => column);
+
+  GeneratedColumn<int> get hDay =>
+      $composableBuilder(column: $table.hDay, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$FastingTrackingTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FastingTrackingTable,
+          FastingTrackingData,
+          $$FastingTrackingTableFilterComposer,
+          $$FastingTrackingTableOrderingComposer,
+          $$FastingTrackingTableAnnotationComposer,
+          $$FastingTrackingTableCreateCompanionBuilder,
+          $$FastingTrackingTableUpdateCompanionBuilder,
+          (
+            FastingTrackingData,
+            BaseReferences<
+              _$AppDatabase,
+              $FastingTrackingTable,
+              FastingTrackingData
+            >,
+          ),
+          FastingTrackingData,
+          PrefetchHooks Function()
+        > {
+  $$FastingTrackingTableTableManager(
+    _$AppDatabase db,
+    $FastingTrackingTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FastingTrackingTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FastingTrackingTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FastingTrackingTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> hYear = const Value.absent(),
+                Value<int> hMonth = const Value.absent(),
+                Value<int> hDay = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => FastingTrackingCompanion(
+                id: id,
+                hYear: hYear,
+                hMonth: hMonth,
+                hDay: hDay,
+                type: type,
+                timestamp: timestamp,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int hYear,
+                required int hMonth,
+                required int hDay,
+                required String type,
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => FastingTrackingCompanion.insert(
+                id: id,
+                hYear: hYear,
+                hMonth: hMonth,
+                hDay: hDay,
+                type: type,
+                timestamp: timestamp,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FastingTrackingTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FastingTrackingTable,
+      FastingTrackingData,
+      $$FastingTrackingTableFilterComposer,
+      $$FastingTrackingTableOrderingComposer,
+      $$FastingTrackingTableAnnotationComposer,
+      $$FastingTrackingTableCreateCompanionBuilder,
+      $$FastingTrackingTableUpdateCompanionBuilder,
+      (
+        FastingTrackingData,
+        BaseReferences<
+          _$AppDatabase,
+          $FastingTrackingTable,
+          FastingTrackingData
+        >,
+      ),
+      FastingTrackingData,
+      PrefetchHooks Function()
+    >;
+typedef $$CalendarNotesTableCreateCompanionBuilder =
+    CalendarNotesCompanion Function({
+      Value<int> id,
+      required int hYear,
+      required int hMonth,
+      required int hDay,
+      required String note,
+      Value<DateTime> timestamp,
+    });
+typedef $$CalendarNotesTableUpdateCompanionBuilder =
+    CalendarNotesCompanion Function({
+      Value<int> id,
+      Value<int> hYear,
+      Value<int> hMonth,
+      Value<int> hDay,
+      Value<String> note,
+      Value<DateTime> timestamp,
+    });
+
+class $$CalendarNotesTableFilterComposer
+    extends Composer<_$AppDatabase, $CalendarNotesTable> {
+  $$CalendarNotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hYear => $composableBuilder(
+    column: $table.hYear,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hMonth => $composableBuilder(
+    column: $table.hMonth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hDay => $composableBuilder(
+    column: $table.hDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CalendarNotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CalendarNotesTable> {
+  $$CalendarNotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hYear => $composableBuilder(
+    column: $table.hYear,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hMonth => $composableBuilder(
+    column: $table.hMonth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hDay => $composableBuilder(
+    column: $table.hDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CalendarNotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CalendarNotesTable> {
+  $$CalendarNotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get hYear =>
+      $composableBuilder(column: $table.hYear, builder: (column) => column);
+
+  GeneratedColumn<int> get hMonth =>
+      $composableBuilder(column: $table.hMonth, builder: (column) => column);
+
+  GeneratedColumn<int> get hDay =>
+      $composableBuilder(column: $table.hDay, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
+class $$CalendarNotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CalendarNotesTable,
+          CalendarNote,
+          $$CalendarNotesTableFilterComposer,
+          $$CalendarNotesTableOrderingComposer,
+          $$CalendarNotesTableAnnotationComposer,
+          $$CalendarNotesTableCreateCompanionBuilder,
+          $$CalendarNotesTableUpdateCompanionBuilder,
+          (
+            CalendarNote,
+            BaseReferences<_$AppDatabase, $CalendarNotesTable, CalendarNote>,
+          ),
+          CalendarNote,
+          PrefetchHooks Function()
+        > {
+  $$CalendarNotesTableTableManager(_$AppDatabase db, $CalendarNotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CalendarNotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CalendarNotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CalendarNotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> hYear = const Value.absent(),
+                Value<int> hMonth = const Value.absent(),
+                Value<int> hDay = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => CalendarNotesCompanion(
+                id: id,
+                hYear: hYear,
+                hMonth: hMonth,
+                hDay: hDay,
+                note: note,
+                timestamp: timestamp,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int hYear,
+                required int hMonth,
+                required int hDay,
+                required String note,
+                Value<DateTime> timestamp = const Value.absent(),
+              }) => CalendarNotesCompanion.insert(
+                id: id,
+                hYear: hYear,
+                hMonth: hMonth,
+                hDay: hDay,
+                note: note,
+                timestamp: timestamp,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CalendarNotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CalendarNotesTable,
+      CalendarNote,
+      $$CalendarNotesTableFilterComposer,
+      $$CalendarNotesTableOrderingComposer,
+      $$CalendarNotesTableAnnotationComposer,
+      $$CalendarNotesTableCreateCompanionBuilder,
+      $$CalendarNotesTableUpdateCompanionBuilder,
+      (
+        CalendarNote,
+        BaseReferences<_$AppDatabase, $CalendarNotesTable, CalendarNote>,
+      ),
+      CalendarNote,
+      PrefetchHooks Function()
+    >;
+typedef $$DailyCommitmentTableCreateCompanionBuilder =
+    DailyCommitmentCompanion Function({
+      Value<int> id,
+      required DateTime date,
+      Value<int> prayerCount,
+      Value<bool> morningAzkar,
+      Value<bool> eveningAzkar,
+    });
+typedef $$DailyCommitmentTableUpdateCompanionBuilder =
+    DailyCommitmentCompanion Function({
+      Value<int> id,
+      Value<DateTime> date,
+      Value<int> prayerCount,
+      Value<bool> morningAzkar,
+      Value<bool> eveningAzkar,
+    });
+
+class $$DailyCommitmentTableFilterComposer
+    extends Composer<_$AppDatabase, $DailyCommitmentTable> {
+  $$DailyCommitmentTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get prayerCount => $composableBuilder(
+    column: $table.prayerCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get morningAzkar => $composableBuilder(
+    column: $table.morningAzkar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get eveningAzkar => $composableBuilder(
+    column: $table.eveningAzkar,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DailyCommitmentTableOrderingComposer
+    extends Composer<_$AppDatabase, $DailyCommitmentTable> {
+  $$DailyCommitmentTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get prayerCount => $composableBuilder(
+    column: $table.prayerCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get morningAzkar => $composableBuilder(
+    column: $table.morningAzkar,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get eveningAzkar => $composableBuilder(
+    column: $table.eveningAzkar,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DailyCommitmentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DailyCommitmentTable> {
+  $$DailyCommitmentTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get prayerCount => $composableBuilder(
+    column: $table.prayerCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get morningAzkar => $composableBuilder(
+    column: $table.morningAzkar,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get eveningAzkar => $composableBuilder(
+    column: $table.eveningAzkar,
+    builder: (column) => column,
+  );
+}
+
+class $$DailyCommitmentTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DailyCommitmentTable,
+          DailyCommitmentData,
+          $$DailyCommitmentTableFilterComposer,
+          $$DailyCommitmentTableOrderingComposer,
+          $$DailyCommitmentTableAnnotationComposer,
+          $$DailyCommitmentTableCreateCompanionBuilder,
+          $$DailyCommitmentTableUpdateCompanionBuilder,
+          (
+            DailyCommitmentData,
+            BaseReferences<
+              _$AppDatabase,
+              $DailyCommitmentTable,
+              DailyCommitmentData
+            >,
+          ),
+          DailyCommitmentData,
+          PrefetchHooks Function()
+        > {
+  $$DailyCommitmentTableTableManager(
+    _$AppDatabase db,
+    $DailyCommitmentTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DailyCommitmentTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DailyCommitmentTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DailyCommitmentTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<int> prayerCount = const Value.absent(),
+                Value<bool> morningAzkar = const Value.absent(),
+                Value<bool> eveningAzkar = const Value.absent(),
+              }) => DailyCommitmentCompanion(
+                id: id,
+                date: date,
+                prayerCount: prayerCount,
+                morningAzkar: morningAzkar,
+                eveningAzkar: eveningAzkar,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime date,
+                Value<int> prayerCount = const Value.absent(),
+                Value<bool> morningAzkar = const Value.absent(),
+                Value<bool> eveningAzkar = const Value.absent(),
+              }) => DailyCommitmentCompanion.insert(
+                id: id,
+                date: date,
+                prayerCount: prayerCount,
+                morningAzkar: morningAzkar,
+                eveningAzkar: eveningAzkar,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DailyCommitmentTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DailyCommitmentTable,
+      DailyCommitmentData,
+      $$DailyCommitmentTableFilterComposer,
+      $$DailyCommitmentTableOrderingComposer,
+      $$DailyCommitmentTableAnnotationComposer,
+      $$DailyCommitmentTableCreateCompanionBuilder,
+      $$DailyCommitmentTableUpdateCompanionBuilder,
+      (
+        DailyCommitmentData,
+        BaseReferences<
+          _$AppDatabase,
+          $DailyCommitmentTable,
+          DailyCommitmentData
+        >,
+      ),
+      DailyCommitmentData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4583,4 +6385,10 @@ class $AppDatabaseManager {
       $$KhatmaPlansTableTableManager(_db, _db.khatmaPlans);
   $$AchievementsTableTableManager get achievements =>
       $$AchievementsTableTableManager(_db, _db.achievements);
+  $$FastingTrackingTableTableManager get fastingTracking =>
+      $$FastingTrackingTableTableManager(_db, _db.fastingTracking);
+  $$CalendarNotesTableTableManager get calendarNotes =>
+      $$CalendarNotesTableTableManager(_db, _db.calendarNotes);
+  $$DailyCommitmentTableTableManager get dailyCommitment =>
+      $$DailyCommitmentTableTableManager(_db, _db.dailyCommitment);
 }

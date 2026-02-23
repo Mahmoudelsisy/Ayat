@@ -1,20 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' hide Column;
+import '../../../main.dart';
+import '../../../core/database/database.dart';
 
-class CalendarScreen extends StatefulWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   late HijriCalendar _selectedDate;
+  List<FastingTrackingData> _fastingDays = [];
+  List<CalendarNote> _notes = [];
 
   @override
   void initState() {
     super.initState();
     _selectedDate = HijriCalendar.now();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final db = ref.read(databaseProvider);
+    final fasting = await (db.select(db.fastingTracking)
+          ..where((t) => t.hYear.equals(_selectedDate.hYear) & t.hMonth.equals(_selectedDate.hMonth)))
+        .get();
+    final notes = await (db.select(db.calendarNotes)
+          ..where((t) => t.hYear.equals(_selectedDate.hYear) & t.hMonth.equals(_selectedDate.hMonth)))
+        .get();
+
+    if (mounted) {
+      setState(() {
+        _fastingDays = fasting;
+        _notes = notes;
+      });
+    }
   }
 
   @override
@@ -37,19 +61,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 if (index < _getStartWeekday()) return const SizedBox();
                 final day = index - _getStartWeekday() + 1;
                 final isToday = _isToday(day);
+                final isFasting = _fastingDays.any((d) => d.hDay == day);
+                final hasNote = _notes.any((n) => n.hDay == day);
 
-                return Container(
-                  decoration: BoxDecoration(
-                    color: isToday ? Colors.green : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      day.toString(),
-                      style: TextStyle(
-                        color: isToday ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
+                return InkWell(
+                  onTap: () => _showDayDetails(day),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isToday
+                          ? Colors.green
+                          : isFasting
+                              ? Colors.orange.withValues(alpha: 0.3)
+                              : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                      border: hasNote ? Border.all(color: Colors.blue, width: 2) : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Text(
+                            day.toString(),
+                            style: TextStyle(
+                              color: isToday ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (isFasting)
+                          const Positioned(
+                            top: 2,
+                            right: 2,
+                            child: Icon(Icons.wb_sunny, size: 12, color: Colors.orange),
+                          ),
+                        if (hasNote)
+                          const Positioned(
+                            bottom: 2,
+                            left: 2,
+                            child: Icon(Icons.note, size: 12, color: Colors.blue),
+                          ),
+                      ],
                     ),
                   ),
                 );
@@ -58,6 +108,82 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           _buildEventsList(),
         ],
+      ),
+    );
+  }
+
+  void _showDayDetails(int day) {
+    final fastingDay = _fastingDays.where((d) => d.hDay == day).firstOrNull;
+    final note = _notes.where((n) => n.hDay == day).firstOrNull;
+    final noteController = TextEditingController(text: note?.note ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('يوم $day ${_selectedDate.longMonthName}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            SwitchListTile(
+              title: const Text('صيام'),
+              value: fastingDay != null,
+              onChanged: (val) async {
+                final db = ref.read(databaseProvider);
+                if (val) {
+                  await db.into(db.fastingTracking).insert(FastingTrackingCompanion.insert(
+                        hYear: _selectedDate.hYear,
+                        hMonth: _selectedDate.hMonth,
+                        hDay: day,
+                        type: 'Sunnah',
+                      ));
+                } else if (fastingDay != null) {
+                  await (db.delete(db.fastingTracking)..where((t) => t.id.equals(fastingDay.id))).go();
+                }
+                if (context.mounted) Navigator.pop(context);
+                _loadData();
+              },
+            ),
+            const Divider(),
+            const Text('ملاحظات:', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(hintText: 'أضف ملاحظة لهذا اليوم...'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                final db = ref.read(databaseProvider);
+                if (noteController.text.isEmpty) {
+                  if (note != null) {
+                    await (db.delete(db.calendarNotes)..where((t) => t.id.equals(note.id))).go();
+                  }
+                } else {
+                  if (note != null) {
+                    await (db.update(db.calendarNotes)..where((t) => t.id.equals(note.id)))
+                        .write(CalendarNotesCompanion(note: Value(noteController.text)));
+                  } else {
+                    await db.into(db.calendarNotes).insert(CalendarNotesCompanion.insert(
+                          hYear: _selectedDate.hYear,
+                          hMonth: _selectedDate.hMonth,
+                          hDay: day,
+                          note: noteController.text,
+                        ));
+                  }
+                }
+                if (context.mounted) Navigator.pop(context);
+                _loadData();
+              },
+              child: const Text('حفظ'),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
@@ -102,6 +228,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       } else {
         _selectedDate.hMonth++;
       }
+      _loadData();
     });
   }
 
@@ -113,6 +240,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       } else {
         _selectedDate.hMonth--;
       }
+      _loadData();
     });
   }
 

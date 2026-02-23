@@ -63,7 +63,10 @@ class AyatApp extends ConsumerWidget {
 
 final downloadProgressProvider = StateProvider<double>((ref) => 0.0);
 final isDownloadingProvider = StateProvider<bool>((ref) => false);
-final isAppLockedProvider = StateProvider<bool>((ref) => false);
+final isAppLockedProvider = StateProvider<bool>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return prefs.getBool('is_locked') ?? false;
+});
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   final isDark = prefs.getBool('is_dark') ?? false;
@@ -90,14 +93,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     _checkData();
   }
 
+  bool _isAuthenticating = false;
+
   Future<void> _checkData() async {
     // Auth Check
     final isLocked = ref.read(isAppLockedProvider);
     if (isLocked) {
+      setState(() => _isAuthenticating = true);
       final authService = ref.read(authServiceProvider);
       final authenticated = await authService.authenticate();
+      setState(() => _isAuthenticating = false);
       if (!authenticated) {
-        // App remains locked or exits
+        // App remains locked
         return;
       }
     }
@@ -159,8 +166,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 'جاري تحميل البيانات... ${(progress * 100).toInt()}%',
                 style: const TextStyle(fontSize: 16),
               ),
-            ] else
+            ] else if (_isAuthenticating) ...[
               const CircularProgressIndicator(),
+              const SizedBox(height: 10),
+              const Text('يرجى تأكيد الهوية...'),
+            ] else ...[
+              const CircularProgressIndicator(),
+              if (ref.watch(isAppLockedProvider)) ...[
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _checkData,
+                  child: const Text('إعادة المحاولة'),
+                ),
+              ]
+            ],
           ],
         ),
       ),

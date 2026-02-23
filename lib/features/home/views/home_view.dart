@@ -40,6 +40,15 @@ final dailyVerseProvider = FutureProvider<QuranData?>((ref) async {
   return await query.getSingleOrNull();
 });
 
+final todayCommitmentProvider = FutureProvider<DailyCommitmentData?>((ref) async {
+  final db = ref.read(databaseProvider);
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+  final endOfDay = startOfDay.add(const Duration(days: 1));
+
+  return await (db.select(db.dailyCommitment)..where((t) => t.date.isBetweenValues(startOfDay, endOfDay))).getSingleOrNull();
+});
+
 final spiritualTipProvider = Provider<String>((ref) {
   final tips = [
     "ابدأ يومك بذكْر الله لتنعم بالبركة في وقتك.",
@@ -254,6 +263,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildCommitmentStats() {
+    final commitmentAsync = ref.watch(todayCommitmentProvider);
+
     return Card(
       elevation: 4,
       color: Colors.blue[50],
@@ -263,13 +274,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
           children: [
             const Text('مؤشرات الالتزام اليومي', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem('الصلوات', '5/5', Icons.mosque, Colors.green),
-                _buildStatItem('الأذكار', '2/2', Icons.favorite, Colors.red),
-                _buildStatItem('الورد', '10ص', Icons.menu_book, Colors.blue),
-              ],
+            commitmentAsync.when(
+              data: (data) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem('الصلوات', '${data?.prayerCount ?? 0}/5', Icons.mosque, Colors.green, onTap: () => _updatePrayerCount(data)),
+                  _buildStatItem('الأذكار', '${(data?.morningAzkar ?? false ? 1 : 0) + (data?.eveningAzkar ?? false ? 1 : 0)}/2',
+                      Icons.favorite, Colors.red,
+                      onTap: () => _toggleAzkar(data)),
+                  _buildStatItem('الورد', 'جاري', Icons.menu_book, Colors.blue),
+                ],
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Text('خطأ: $err'),
             ),
           ],
         ),
@@ -277,14 +294,51 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 30),
-        const SizedBox(height: 5),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
+  Future<void> _updatePrayerCount(DailyCommitmentData? data) async {
+    final db = ref.read(databaseProvider);
+    if (data == null) {
+      await db.into(db.dailyCommitment).insert(DailyCommitmentCompanion.insert(
+            date: DateTime.now(),
+            prayerCount: const drift.Value(1),
+          ));
+    } else {
+      await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id)))
+          .write(DailyCommitmentCompanion(prayerCount: drift.Value((data.prayerCount + 1) % 6)));
+    }
+    ref.invalidate(todayCommitmentProvider);
+  }
+
+  Future<void> _toggleAzkar(DailyCommitmentData? data) async {
+    final db = ref.read(databaseProvider);
+    if (data == null) {
+      await db.into(db.dailyCommitment).insert(DailyCommitmentCompanion.insert(
+            date: DateTime.now(),
+            morningAzkar: const drift.Value(true),
+          ));
+    } else {
+      if (!data.morningAzkar) {
+        await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id))).write(const DailyCommitmentCompanion(morningAzkar: drift.Value(true)));
+      } else if (!data.eveningAzkar) {
+        await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id))).write(const DailyCommitmentCompanion(eveningAzkar: drift.Value(true)));
+      } else {
+        await (db.update(db.dailyCommitment)..where((t) => t.id.equals(data.id)))
+            .write(const DailyCommitmentCompanion(morningAzkar: drift.Value(false), eveningAzkar: drift.Value(false)));
+      }
+    }
+    ref.invalidate(todayCommitmentProvider);
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon, Color color, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 5),
+          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 

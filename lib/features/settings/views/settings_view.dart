@@ -185,6 +185,17 @@ class SettingsView extends ConsumerWidget {
               ref.read(themeModeProvider.notifier).state = val ? ThemeMode.dark : ThemeMode.light;
             },
           ),
+          SwitchListTile(
+            secondary: const Icon(Icons.lock),
+            title: const Text('قفل التطبيق'),
+            subtitle: const Text('استخدم بصمة الإصبع أو رمز الجهاز'),
+            value: ref.watch(isAppLockedProvider),
+            onChanged: (val) {
+              final prefs = ref.read(sharedPreferencesProvider);
+              prefs.setBool('is_locked', val);
+              ref.read(isAppLockedProvider.notifier).state = val;
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.color_lens),
             title: const Text('لون التطبيق'),
