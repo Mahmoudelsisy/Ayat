@@ -51,7 +51,7 @@ class DataDownloadService {
               )
           ]);
         });
-        onProgress((i + 1) / surahs.length);
+        onProgress?.call((i + 1) / surahs.length);
       }
     }
   }

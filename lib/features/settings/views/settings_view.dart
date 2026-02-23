@@ -41,6 +41,37 @@ class SettingsView extends ConsumerWidget {
     );
   }
 
+  void _showColorPickerDialog(BuildContext context, WidgetRef ref) {
+    final colors = {
+      'الأخضر': const Color(0xFF1B5E20),
+      'الأزرق': const Color(0xFF0D47A1),
+      'البني': const Color(0xFF4E342E),
+      'الأرجواني': const Color(0xFF4A148C),
+      'الذهبي': const Color(0xFFBF9B30),
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('اختر لون التطبيق'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: colors.entries.map((e) => ListTile(
+            leading: CircleAvatar(backgroundColor: e.value),
+            title: Text(e.key),
+            onTap: () {
+              final prefs = ref.read(sharedPreferencesProvider);
+              // ignore: deprecated_member_use
+              prefs.setInt('theme_color', e.value.value);
+              ref.read(themeColorProvider.notifier).state = e.value;
+              Navigator.pop(context);
+            },
+          )).toList(),
+        ),
+      ),
+    );
+  }
+
   void _showReadingSelection(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -68,7 +99,9 @@ class SettingsView extends ConsumerWidget {
                     prefs.setString('quran_reading', e.key);
                     ref.read(selectedReadingProvider.notifier).state = e.key;
 
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تغيير الرواية بنجاح')));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تغيير الرواية بنجاح')));
+                    }
                   },
                 );
               }).toList(),
@@ -151,6 +184,12 @@ class SettingsView extends ConsumerWidget {
               prefs.setBool('is_dark', val);
               ref.read(themeModeProvider.notifier).state = val ? ThemeMode.dark : ThemeMode.light;
             },
+          ),
+          ListTile(
+            leading: const Icon(Icons.color_lens),
+            title: const Text('لون التطبيق'),
+            subtitle: const Text('اختر لونك المفضل'),
+            onTap: () => _showColorPickerDialog(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.menu_book),

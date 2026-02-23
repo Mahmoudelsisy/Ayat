@@ -66,11 +66,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
   LoopMode _loopMode = LoopMode.off;
+  int _repeatCount = 1;
+  int _currentRepeatIndex = 0;
   bool _isMushafMode = false;
   int? _currentAyahIndex;
   bool _isDownloaded = false;
   double _downloadProgress = 0;
   bool _isDownloading = false;
+  double _playbackSpeed = 1.0;
   final _downloadService = AudioDownloadService();
 
   @override
@@ -84,22 +87,49 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void _listenToPlayback() {
     _audioPlayer.currentIndexStream.listen((index) {
       if (mounted) {
-        setState(() => _currentAyahIndex = index);
+        setState(() {
+          if (_currentAyahIndex != index) {
+            _currentRepeatIndex = 0;
+          }
+          _currentAyahIndex = index;
+        });
       }
     });
-    _audioPlayer.playerStateStream.listen((state) {
+    _audioPlayer.playerStateStream.listen((state) async {
       if (mounted) {
         setState(() {
           _isPlaying = state.playing;
-          if (state.processingState == ProcessingState.completed) {
-            _isPlaying = false;
-          }
         });
+      }
+
+      if (state.processingState == ProcessingState.completed) {
+        if (_loopMode == LoopMode.one && _repeatCount > 1) {
+          if (_currentRepeatIndex < _repeatCount - 1) {
+            _currentRepeatIndex++;
+            await _audioPlayer.seek(Duration.zero);
+            await _audioPlayer.play();
+          } else {
+            _currentRepeatIndex = 0;
+            if (_audioPlayer.hasNext) {
+              await _audioPlayer.seekToNext();
+              await _audioPlayer.play();
+            } else {
+              if (mounted) setState(() => _isPlaying = false);
+            }
+          }
+        } else if (_loopMode == LoopMode.off) {
+          if (mounted) setState(() => _isPlaying = false);
+        }
       }
     });
     _audioPlayer.loopModeStream.listen((mode) {
       if (mounted) {
         setState(() => _loopMode = mode);
+      }
+    });
+    _audioPlayer.speedStream.listen((speed) {
+      if (mounted) {
+        setState(() => _playbackSpeed = speed);
       }
     });
   }
@@ -132,12 +162,35 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   }
 
   void _toggleLoopMode() {
-    final nextMode = switch (_loopMode) {
-      LoopMode.off => LoopMode.one,
-      LoopMode.one => LoopMode.all,
-      LoopMode.all => LoopMode.off,
-    };
-    _audioPlayer.setLoopMode(nextMode);
+    setState(() {
+      if (_loopMode == LoopMode.off) {
+        _loopMode = LoopMode.one;
+        _repeatCount = 1;
+      } else if (_loopMode == LoopMode.one && _repeatCount == 1) {
+        _repeatCount = 3;
+      } else if (_loopMode == LoopMode.one && _repeatCount == 3) {
+        _repeatCount = 5;
+      } else if (_loopMode == LoopMode.one && _repeatCount == 5) {
+        _loopMode = LoopMode.all;
+      } else {
+        _loopMode = LoopMode.off;
+      }
+
+      // If we are doing custom repeat (3x, 5x), we actually want just_audio to NOT loop automatically
+      // because we handle it in playerStateStream.
+      if (_loopMode == LoopMode.one && _repeatCount > 1) {
+        _audioPlayer.setLoopMode(LoopMode.off);
+      } else {
+        _audioPlayer.setLoopMode(_loopMode);
+      }
+    });
+  }
+
+  void _changeSpeed() {
+    final speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+    final currentIndex = speeds.indexOf(_playbackSpeed);
+    final nextIndex = (currentIndex + 1) % speeds.length;
+    _audioPlayer.setSpeed(speeds[nextIndex]);
   }
 
   Future<void> _playSurah() async {
@@ -150,18 +203,6 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         final ayahs = await ref.read(quranContentProvider(_currentFilter).future);
         final playlist = ConcatenatingAudioSource(
           children: ayahs.map((ayah) {
-            // Using Islamic Network for Ayah-by-Ayah URLs
-            // We need absolute ayah number, but let's try a simpler way if possible
-            // Actually, Islamic Network supports surah:ayah format in some endpoints?
-            // No, but we can use: https://cdn.islamic.network/quran/audio/128/ar.alafasy/{absolute_ayah}.mp3
-
-            // For now, let's use a placeholder that works or build it.
-            // I'll use a helper to get absolute ayah number if possible,
-            // but wait, alquran.cloud has it in the surah response.
-
-            // Let's stick to the whole surah for now if highlighting is too complex without timing data,
-            // OR I can use the alquran.cloud API to get all ayah URLs.
-
             final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(ayah.surahNumber, ayah.ayahNumber)}.mp3';
             return AudioSource.uri(Uri.parse(url));
           }).toList(),
@@ -319,16 +360,35 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             onPressed: _showReciterSelection,
           ),
           IconButton(
-            icon: Icon(
-              _loopMode == LoopMode.one
-                  ? Icons.repeat_one
-                  : _loopMode == LoopMode.all
-                      ? Icons.repeat
-                      : Icons.repeat_on_outlined,
-              color: _loopMode == LoopMode.off ? Colors.white54 : Colors.white,
+            icon: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  _loopMode == LoopMode.one
+                      ? Icons.repeat_one
+                      : _loopMode == LoopMode.all
+                          ? Icons.repeat
+                          : Icons.repeat_on_outlined,
+                  color: _loopMode == LoopMode.off ? Colors.white54 : Colors.white,
+                ),
+                if (_loopMode == LoopMode.one && _repeatCount > 1)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Text(
+                      '$_repeatCount',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.amber),
+                    ),
+                  ),
+              ],
             ),
             onPressed: _toggleLoopMode,
             tooltip: 'وضع التكرار',
+          ),
+          IconButton(
+            icon: Text('${_playbackSpeed}x', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            onPressed: _changeSpeed,
+            tooltip: 'سرعة التشغيل',
           ),
           IconButton(
             icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
@@ -355,7 +415,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       surahNumber: ayah.surahNumber,
                       ayahNumber: ayah.ayahNumber,
                     ));
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديد الآية كمقروءة')));
                 }
               },
@@ -394,7 +454,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                                             surahNumber: ayah.surahNumber,
                                             ayahNumber: ayah.ayahNumber,
                                           ));
-                                      if (mounted) {
+                                      if (context.mounted) {
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت الإضافة للمرجعية')));
                                       }

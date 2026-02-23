@@ -5,12 +5,12 @@ class AppTheme {
   static const Color islamicGreen = Color(0xFF1B5E20);
   static const Color calmBlue = Color(0xFF0D47A1);
 
-  static ThemeData get lightTheme {
+  static ThemeData lightTheme(Color seed) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: islamicGreen,
-        primary: islamicGreen,
+        seedColor: seed,
+        primary: seed,
         secondary: calmBlue,
       ),
       textTheme: GoogleFonts.cairoTextTheme(),
@@ -22,14 +22,14 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
+  static ThemeData darkTheme(Color seed) {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: islamicGreen,
+        seedColor: seed,
         brightness: Brightness.dark,
-        primary: islamicGreen,
+        primary: seed,
         secondary: calmBlue,
       ),
       textTheme: GoogleFonts.cairoTextTheme(ThemeData.dark().textTheme),

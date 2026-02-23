@@ -38,12 +38,15 @@ class AyatApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final themeColor = ref.watch(themeColorProvider);
+
     return MaterialApp(
       title: 'Ayat | آيات',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      theme: AppTheme.lightTheme(themeColor),
+      darkTheme: AppTheme.darkTheme(themeColor),
+      themeMode: themeMode,
       locale: const Locale('ar'),
       supportedLocales: const [
         Locale('ar'),
@@ -65,6 +68,12 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   final isDark = prefs.getBool('is_dark') ?? false;
   return isDark ? ThemeMode.dark : ThemeMode.light;
+});
+
+final themeColorProvider = StateProvider<Color>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final colorValue = prefs.getInt('theme_color') ?? AppTheme.islamicGreen.value;
+  return Color(colorValue);
 });
 
 class SplashScreen extends ConsumerStatefulWidget {

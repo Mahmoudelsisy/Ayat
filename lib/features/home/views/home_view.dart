@@ -31,6 +31,30 @@ final randomDuaProvider = FutureProvider<AzkarData?>((ref) async {
   return await query.getSingleOrNull();
 });
 
+final dailyVerseProvider = FutureProvider<QuranData?>((ref) async {
+  final db = ref.read(databaseProvider);
+  const count = 6236;
+  final randomId = DateTime.now().day * 100 % count + 1;
+  final query = db.select(db.quran)..where((t) => t.id.equals(randomId))..limit(1);
+  return await query.getSingleOrNull();
+});
+
+final spiritualTipProvider = Provider<String>((ref) {
+  final tips = [
+    "ابدأ يومك بذكْر الله لتنعم بالبركة في وقتك.",
+    "ركعة في جوف الليل خير من الدنيا وما فيها.",
+    "حافظ على وردك القرآني ولو كان صفحة واحدة يومياً.",
+    "الصدقة تطفئ غضب الرب وتدفع ميتة السوء.",
+    "جدد توبتك مع كل أذان، فالمؤمن تواب.",
+    "صلة الرحم تزيد في الرزق وتطيل في العمر.",
+    "أكثر من الصلاة على النبي صلى الله عليه وسلم يوم الجمعة.",
+    "بر الوالدين مفتاحك إلى الجنة.",
+    "الكلمة الطيبة صدقة.",
+    "اجعل لك خبيئة من عمل صالح لا يعلمها إلا الله.",
+  ];
+  return tips[DateTime.now().day % tips.length];
+});
+
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
@@ -149,6 +173,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
             _buildLastReadCard(context, lastSurahNum, lastSurahName!),
             const SizedBox(height: 20),
           ],
+          _buildDailyVerse(ref),
+          const SizedBox(height: 10),
+          _buildSpiritualTip(ref),
+          const SizedBox(height: 20),
           _buildDuaOfDay(ref),
           const SizedBox(height: 20),
           _buildCommitmentStats(),
@@ -288,6 +316,72 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ],
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildDailyVerse(WidgetRef ref) {
+    final verseAsync = ref.watch(dailyVerseProvider);
+    return Card(
+      elevation: 0,
+      color: Colors.green.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15), side: const BorderSide(color: Colors.green)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome, color: Colors.green),
+                SizedBox(width: 10),
+                Text('آية اليوم', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            verseAsync.when(
+              data: (verse) => Column(
+                children: [
+                  Text(
+                    verse?.verseText ?? '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Amiri'),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'سورة ${verse?.surahNumber} - آية ${verse?.ayahNumber}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+              loading: () => const CircularProgressIndicator(),
+              error: (err, stack) => const Text('الحمد لله رب العالمين'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpiritualTip(WidgetRef ref) {
+    final tip = ref.watch(spiritualTipProvider);
+    return Card(
+      elevation: 0,
+      color: Colors.blue.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15), side: const BorderSide(color: Colors.blue)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            const Icon(Icons.lightbulb, color: Colors.blue),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Text(
+                tip,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
