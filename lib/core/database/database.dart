@@ -66,7 +66,15 @@ class KhatmaPlans extends Table {
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 }
 
-@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames, KhatmaPlans])
+class Achievements extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()();
+  TextColumn get description => text()();
+  TextColumn get icon => text()();
+  DateTimeColumn get dateEarned => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DriftDatabase(tables: [Quran, Tafsirs, Azkar, UserProgress, Bookmarks, AllahNames, KhatmaPlans, Achievements])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

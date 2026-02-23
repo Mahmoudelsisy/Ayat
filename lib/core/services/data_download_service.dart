@@ -9,7 +9,7 @@ class DataDownloadService {
   DataDownloadService(this.db);
 
   Future<void> downloadAllData(Function(double) onProgress) async {
-    await downloadQuran((p) => onProgress(p * 0.7));
+    await downloadQuran(onProgress: (p) => onProgress(p * 0.7));
     await downloadTafsir("al_sa'dy.json", 'saadi', (p) => onProgress(0.7 + (p * 0.07)));
     await downloadTafsir("ebn_katheer.json", 'ibn_kathir', (p) => onProgress(0.77 + (p * 0.07)));
     await downloadTafsir("ma'any_elkalemat.json", 'meanings', (p) => onProgress(0.84 + (p * 0.06)));
@@ -17,20 +17,22 @@ class DataDownloadService {
     await downloadAllahNames((p) => onProgress(0.95 + (p * 0.05)));
   }
 
-  Future<void> downloadQuran(Function(double) onProgress) async {
-    // Check if data already exists
-    final count = await (db.select(db.quran)..limit(1)).get();
+  Future<void> downloadQuran({String edition = 'quran-uthmani', Function(double)? onProgress}) async {
+    // Check if data for this edition already exists
+    final count = await (db.select(db.quran)..where((t) => t.reading.equals(edition))..limit(1)).get();
     if (count.isNotEmpty) {
-      onProgress(1.0);
+      onProgress?.call(1.0);
       return;
     }
 
-    final response = await http.get(Uri.parse('http://api.alquran.cloud/v1/quran/quran-uthmani'));
+    final response = await http.get(Uri.parse('http://api.alquran.cloud/v1/quran/$edition'));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final surahs = data['data']['surahs'] as List;
 
       for (var i = 0; i < surahs.length; i++) {
+        final p = (i + 1) / surahs.length;
+        if (onProgress != null) onProgress(p);
         final surah = surahs[i];
         final ayahs = surah['ayahs'] as List;
         final surahNumber = surah['number'] as int;
@@ -45,6 +47,7 @@ class DataDownloadService {
                 hizbNumber: Value(ayah['hizbQuarter'] as int),
                 pageNumber: Value(ayah['page'] as int),
                 verseText: ayah['text'] as String,
+                reading: Value(edition),
               )
           ]);
         });

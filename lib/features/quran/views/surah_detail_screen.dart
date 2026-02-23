@@ -9,6 +9,7 @@ import '../../tafsir/providers/tafsir_provider.dart';
 import '../../audio/providers/audio_provider.dart';
 import '../../../core/services/audio_download_service.dart';
 import '../../../shared/providers/font_provider.dart';
+import '../../../shared/providers/reading_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/mushaf_view.dart';
 
@@ -31,17 +32,17 @@ class QuranFilter {
 
 final quranContentProvider = FutureProvider.family<List<QuranData>, QuranFilter>((ref, filter) async {
   final db = ref.read(databaseProvider);
+  final reading = ref.watch(selectedReadingProvider);
+
   switch (filter.type) {
     case QuranFilterType.surah:
-      return await (db.select(db.quran)..where((t) => t.surahNumber.equals(filter.value))).get();
+      return await (db.select(db.quran)..where((t) => t.surahNumber.equals(filter.value) & t.reading.equals(reading))).get();
     case QuranFilterType.juz:
-      return await (db.select(db.quran)..where((t) => t.juzNumber.equals(filter.value))).get();
+      return await (db.select(db.quran)..where((t) => t.juzNumber.equals(filter.value) & t.reading.equals(reading))).get();
     case QuranFilterType.hizb:
-      // Hizb here is hizbQuarter. We want the full Hizb (4 quarters).
-      // If user selected Hizb 1, it corresponds to quarters 1, 2, 3, 4.
       final start = (filter.value - 1) * 4 + 1;
       final end = filter.value * 4;
-      return await (db.select(db.quran)..where((t) => t.hizbNumber.isBetween(Variable(start), Variable(end)))).get();
+      return await (db.select(db.quran)..where((t) => t.hizbNumber.isBetween(Variable(start), Variable(end)) & t.reading.equals(reading))).get();
   }
 });
 
@@ -64,6 +65,7 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
+  LoopMode _loopMode = LoopMode.off;
   bool _isMushafMode = false;
   int? _currentAyahIndex;
   bool _isDownloaded = false;
@@ -87,7 +89,17 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     });
     _audioPlayer.playerStateStream.listen((state) {
       if (mounted) {
-        setState(() => _isPlaying = state.playing);
+        setState(() {
+          _isPlaying = state.playing;
+          if (state.processingState == ProcessingState.completed) {
+            _isPlaying = false;
+          }
+        });
+      }
+    });
+    _audioPlayer.loopModeStream.listen((mode) {
+      if (mounted) {
+        setState(() => _loopMode = mode);
       }
     });
   }
@@ -117,6 +129,15 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  void _toggleLoopMode() {
+    final nextMode = switch (_loopMode) {
+      LoopMode.off => LoopMode.one,
+      LoopMode.one => LoopMode.all,
+      LoopMode.all => LoopMode.off,
+    };
+    _audioPlayer.setLoopMode(nextMode);
   }
 
   Future<void> _playSurah() async {
@@ -296,6 +317,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: _showReciterSelection,
+          ),
+          IconButton(
+            icon: Icon(
+              _loopMode == LoopMode.one
+                  ? Icons.repeat_one
+                  : _loopMode == LoopMode.all
+                      ? Icons.repeat
+                      : Icons.repeat_on_outlined,
+              color: _loopMode == LoopMode.off ? Colors.white54 : Colors.white,
+            ),
+            onPressed: _toggleLoopMode,
+            tooltip: 'وضع التكرار',
           ),
           IconButton(
             icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),

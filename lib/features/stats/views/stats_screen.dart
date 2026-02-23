@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import '../../../main.dart';
 import 'package:drift/drift.dart';
 
@@ -25,18 +26,50 @@ final weeklyStatsProvider = FutureProvider<List<double>>((ref) async {
   return counts;
 });
 
+final heatmapStatsProvider = FutureProvider<Map<DateTime, int>>((ref) async {
+  final db = ref.read(databaseProvider);
+  final query = await db.select(db.userProgress).get();
+
+  Map<DateTime, int> dataset = {};
+  for (var item in query) {
+    final date = DateTime(item.timestamp.year, item.timestamp.month, item.timestamp.day);
+    dataset[date] = (dataset[date] ?? 0) + 1;
+  }
+  return dataset;
+});
+
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(weeklyStatsProvider);
+    final heatmapAsync = ref.watch(heatmapStatsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('إحصائيات الالتزام')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          const Text('خريطة الالتزام السنوية', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          heatmapAsync.when(
+            data: (data) => HeatMap(
+              datasets: data,
+              colorMode: ColorMode.opacity,
+              showText: false,
+              scrollable: true,
+              colorsets: const {
+                1: Colors.green,
+              },
+              onClick: (value) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value.toString())));
+              },
+            ),
+            loading: () => const LinearProgressIndicator(),
+            error: (err, stack) => Text('خطأ: $err'),
+          ),
+          const SizedBox(height: 30),
           const Text('نشاط القراءة (آخر 7 أيام)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           SizedBox(

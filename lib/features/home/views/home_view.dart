@@ -15,13 +15,14 @@ import '../../prayer_times/views/travel_mode_screen.dart';
 import '../../audio/views/audio_comparison_screen.dart';
 import 'allah_names_screen.dart';
 import 'khatma_planner_screen.dart';
+import '../../stats/views/achievements_screen.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
   final countExp = db.userProgress.id.count();
   final query = db.selectOnly(db.userProgress)..addColumns([countExp]);
   final result = await query.getSingle();
-  return result.read(countExp) as int? ?? 0;
+  return (result.read(countExp) ?? 0).toInt();
 });
 
 final randomDuaProvider = FutureProvider<AzkarData?>((ref) async {
@@ -46,6 +47,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     super.initState();
     _startTimer();
+    _checkAchievements();
+  }
+
+  Future<void> _checkAchievements() async {
+    final db = ref.read(databaseProvider);
+    final count = await ref.read(readAyahsCountProvider.future);
+
+    if (count >= 100) {
+      final existing = await (db.select(db.achievements)..where((t) => t.title.equals('قارئ مجتهد'))).get();
+      if (existing.isEmpty) {
+        await db.into(db.achievements).insert(AchievementsCompanion.insert(
+          title: 'قارئ مجتهد',
+          description: 'قرأت أكثر من 100 آية',
+          icon: 'star',
+        ));
+      }
+    }
   }
 
   @override
@@ -107,11 +125,25 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final lastSurahName = prefs.getString('last_surah_name');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('آيات')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (_nextPrayerName.isNotEmpty) _buildCountdownCard(),
+      appBar: AppBar(
+        title: const Text('آيات', style: TextStyle(fontFamily: 'Reem Kufi', fontSize: 28)),
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (_nextPrayerName.isNotEmpty) _buildCountdownCard(),
           const SizedBox(height: 20),
           if (lastSurahNum != null) ...[
             _buildLastReadCard(context, lastSurahNum, lastSurahName!),
@@ -155,12 +187,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _buildQuickAction(context, 'مقارنة القراء', Icons.compare, Colors.brown, destination: const AudioComparisonScreen()),
           _buildQuickAction(context, 'أسماء الله الحسنى', Icons.auto_awesome, Colors.amber, destination: const AllahNamesScreen()),
           _buildQuickAction(context, 'مخطط الختمة', Icons.edit_calendar, Colors.deepOrange, destination: const KhatmaPlannerScreen()),
+          _buildQuickAction(context, 'قائمة الإنجازات', Icons.emoji_events, Colors.amber, destination: const AchievementsScreen()),
           _buildQuickAction(context, 'المرجعيات', Icons.bookmark, Colors.red, destination: const BookmarksScreen()),
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),
           _buildQuickAction(context, 'أذكار المساء', Icons.nightlight_round, Colors.indigo),
           _buildQuickAction(context, 'سورة الكهف', Icons.menu_book, Colors.green),
         ],
+      ),
       ),
     );
   }
@@ -226,8 +260,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   Widget _buildCountdownCard() {
     return Card(
+      elevation: 8,
+      shadowColor: Colors.black45,
       color: Colors.blueGrey[900],
-      child: Padding(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(colors: [Color(0xFF263238), Color(0xFF455A64)]),
+        ),
+        child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -235,10 +277,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
             const SizedBox(height: 10),
             Text(
               _formatDuration(_timeLeft),
-              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 2),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                fontFamily: 'monospace',
+              ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

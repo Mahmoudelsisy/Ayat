@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import '../../prayer_times/providers/prayer_settings_provider.dart';
+import '../../../shared/providers/reading_provider.dart';
+import '../../../core/services/data_download_service.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
@@ -35,6 +37,44 @@ class SettingsView extends ConsumerWidget {
             )).toList(),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showReadingSelection(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final selected = ref.watch(selectedReadingProvider);
+          return AlertDialog(
+            title: const Text('اختر الرواية'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: availableReadings.entries.map((e) {
+                return ListTile(
+                  title: Text(e.value),
+                  trailing: selected == e.key ? const Icon(Icons.check, color: Colors.green) : null,
+                  onTap: () async {
+                    final db = ref.read(databaseProvider);
+                    final service = DataDownloadService(db);
+
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري التأكد من توفر البيانات...')));
+
+                    await service.downloadQuran(edition: e.key);
+
+                    final prefs = ref.read(sharedPreferencesProvider);
+                    prefs.setString('quran_reading', e.key);
+                    ref.read(selectedReadingProvider.notifier).state = e.key;
+
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تغيير الرواية بنجاح')));
+                  },
+                );
+              }).toList(),
+            ),
+          );
+        },
       ),
     );
   }
@@ -116,26 +156,7 @@ class SettingsView extends ConsumerWidget {
             leading: const Icon(Icons.menu_book),
             title: const Text('رواية القراءة'),
             subtitle: const Text('حفص عن عاصم'),
-            onTap: () {
-              // Show dialog to select reading
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('اختر الرواية'),
-                  content: const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(title: Text('حفص عن عاصم'), trailing: Icon(Icons.check, color: Colors.green)),
-                      ListTile(title: Text('ورش عن نافع (قريباً)')),
-                      ListTile(title: Text('قالون عن نافع (قريباً)')),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('إغلاق')),
-                  ],
-                ),
-              );
-            },
+            onTap: () => _showReadingSelection(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.language),
