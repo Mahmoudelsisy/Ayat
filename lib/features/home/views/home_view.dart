@@ -10,6 +10,8 @@ import '../../modes/views/modes_screen.dart';
 import '../../bookmarks/views/bookmarks_screen.dart';
 import '../../stats/views/stats_screen.dart';
 import '../../calendar/views/calendar_screen.dart';
+import '../../prayer_times/views/travel_mode_screen.dart';
+import '../../audio/views/audio_comparison_screen.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -137,7 +139,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _buildRamadanCountdown(),
           const SizedBox(height: 20),
           _buildQuickAction(context, 'الإحصائيات والتقدم', Icons.bar_chart, Colors.blue, destination: const StatsScreen()),
+          _buildQuickAction(context, 'وضع السفر (قصر الصلاة)', Icons.flight_takeoff, Colors.blueAccent, destination: const TravelModeScreen()),
           _buildQuickAction(context, 'التقويم الهجري والمناسبات', Icons.calendar_today, Colors.teal, destination: const CalendarScreen()),
+          _buildQuickAction(context, 'مقارنة القراء', Icons.compare, Colors.brown, destination: const AudioComparisonScreen()),
           _buildQuickAction(context, 'المرجعيات', Icons.bookmark, Colors.red, destination: const BookmarksScreen()),
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),

@@ -43,6 +43,28 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _juzNumberMeta = const VerificationMeta(
+    'juzNumber',
+  );
+  @override
+  late final GeneratedColumn<int> juzNumber = GeneratedColumn<int>(
+    'juz_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hizbNumberMeta = const VerificationMeta(
+    'hizbNumber',
+  );
+  @override
+  late final GeneratedColumn<int> hizbNumber = GeneratedColumn<int>(
+    'hizb_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _verseTextMeta = const VerificationMeta(
     'verseText',
   );
@@ -65,13 +87,28 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _readingMeta = const VerificationMeta(
+    'reading',
+  );
+  @override
+  late final GeneratedColumn<String> reading = GeneratedColumn<String>(
+    'reading',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('hafs'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     surahNumber,
     ayahNumber,
+    juzNumber,
+    hizbNumber,
     verseText,
     translation,
+    reading,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -107,6 +144,18 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     } else if (isInserting) {
       context.missing(_ayahNumberMeta);
     }
+    if (data.containsKey('juz_number')) {
+      context.handle(
+        _juzNumberMeta,
+        juzNumber.isAcceptableOrUnknown(data['juz_number']!, _juzNumberMeta),
+      );
+    }
+    if (data.containsKey('hizb_number')) {
+      context.handle(
+        _hizbNumberMeta,
+        hizbNumber.isAcceptableOrUnknown(data['hizb_number']!, _hizbNumberMeta),
+      );
+    }
     if (data.containsKey('verse_text')) {
       context.handle(
         _verseTextMeta,
@@ -122,6 +171,12 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
           data['translation']!,
           _translationMeta,
         ),
+      );
+    }
+    if (data.containsKey('reading')) {
+      context.handle(
+        _readingMeta,
+        reading.isAcceptableOrUnknown(data['reading']!, _readingMeta),
       );
     }
     return context;
@@ -145,6 +200,14 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
         DriftSqlType.int,
         data['${effectivePrefix}ayah_number'],
       )!,
+      juzNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}juz_number'],
+      ),
+      hizbNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}hizb_number'],
+      ),
       verseText: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}verse_text'],
@@ -153,6 +216,10 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
         DriftSqlType.string,
         data['${effectivePrefix}translation'],
       ),
+      reading: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reading'],
+      )!,
     );
   }
 
@@ -166,14 +233,20 @@ class QuranData extends DataClass implements Insertable<QuranData> {
   final int id;
   final int surahNumber;
   final int ayahNumber;
+  final int? juzNumber;
+  final int? hizbNumber;
   final String verseText;
   final String? translation;
+  final String reading;
   const QuranData({
     required this.id,
     required this.surahNumber,
     required this.ayahNumber,
+    this.juzNumber,
+    this.hizbNumber,
     required this.verseText,
     this.translation,
+    required this.reading,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -181,10 +254,17 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     map['id'] = Variable<int>(id);
     map['surah_number'] = Variable<int>(surahNumber);
     map['ayah_number'] = Variable<int>(ayahNumber);
+    if (!nullToAbsent || juzNumber != null) {
+      map['juz_number'] = Variable<int>(juzNumber);
+    }
+    if (!nullToAbsent || hizbNumber != null) {
+      map['hizb_number'] = Variable<int>(hizbNumber);
+    }
     map['verse_text'] = Variable<String>(verseText);
     if (!nullToAbsent || translation != null) {
       map['translation'] = Variable<String>(translation);
     }
+    map['reading'] = Variable<String>(reading);
     return map;
   }
 
@@ -193,10 +273,17 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       id: Value(id),
       surahNumber: Value(surahNumber),
       ayahNumber: Value(ayahNumber),
+      juzNumber: juzNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(juzNumber),
+      hizbNumber: hizbNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hizbNumber),
       verseText: Value(verseText),
       translation: translation == null && nullToAbsent
           ? const Value.absent()
           : Value(translation),
+      reading: Value(reading),
     );
   }
 
@@ -209,8 +296,11 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       id: serializer.fromJson<int>(json['id']),
       surahNumber: serializer.fromJson<int>(json['surahNumber']),
       ayahNumber: serializer.fromJson<int>(json['ayahNumber']),
+      juzNumber: serializer.fromJson<int?>(json['juzNumber']),
+      hizbNumber: serializer.fromJson<int?>(json['hizbNumber']),
       verseText: serializer.fromJson<String>(json['verseText']),
       translation: serializer.fromJson<String?>(json['translation']),
+      reading: serializer.fromJson<String>(json['reading']),
     );
   }
   @override
@@ -220,8 +310,11 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       'id': serializer.toJson<int>(id),
       'surahNumber': serializer.toJson<int>(surahNumber),
       'ayahNumber': serializer.toJson<int>(ayahNumber),
+      'juzNumber': serializer.toJson<int?>(juzNumber),
+      'hizbNumber': serializer.toJson<int?>(hizbNumber),
       'verseText': serializer.toJson<String>(verseText),
       'translation': serializer.toJson<String?>(translation),
+      'reading': serializer.toJson<String>(reading),
     };
   }
 
@@ -229,14 +322,20 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     int? id,
     int? surahNumber,
     int? ayahNumber,
+    Value<int?> juzNumber = const Value.absent(),
+    Value<int?> hizbNumber = const Value.absent(),
     String? verseText,
     Value<String?> translation = const Value.absent(),
+    String? reading,
   }) => QuranData(
     id: id ?? this.id,
     surahNumber: surahNumber ?? this.surahNumber,
     ayahNumber: ayahNumber ?? this.ayahNumber,
+    juzNumber: juzNumber.present ? juzNumber.value : this.juzNumber,
+    hizbNumber: hizbNumber.present ? hizbNumber.value : this.hizbNumber,
     verseText: verseText ?? this.verseText,
     translation: translation.present ? translation.value : this.translation,
+    reading: reading ?? this.reading,
   );
   QuranData copyWithCompanion(QuranCompanion data) {
     return QuranData(
@@ -247,10 +346,15 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       ayahNumber: data.ayahNumber.present
           ? data.ayahNumber.value
           : this.ayahNumber,
+      juzNumber: data.juzNumber.present ? data.juzNumber.value : this.juzNumber,
+      hizbNumber: data.hizbNumber.present
+          ? data.hizbNumber.value
+          : this.hizbNumber,
       verseText: data.verseText.present ? data.verseText.value : this.verseText,
       translation: data.translation.present
           ? data.translation.value
           : this.translation,
+      reading: data.reading.present ? data.reading.value : this.reading,
     );
   }
 
@@ -260,15 +364,26 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           ..write('id: $id, ')
           ..write('surahNumber: $surahNumber, ')
           ..write('ayahNumber: $ayahNumber, ')
+          ..write('juzNumber: $juzNumber, ')
+          ..write('hizbNumber: $hizbNumber, ')
           ..write('verseText: $verseText, ')
-          ..write('translation: $translation')
+          ..write('translation: $translation, ')
+          ..write('reading: $reading')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, surahNumber, ayahNumber, verseText, translation);
+  int get hashCode => Object.hash(
+    id,
+    surahNumber,
+    ayahNumber,
+    juzNumber,
+    hizbNumber,
+    verseText,
+    translation,
+    reading,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -276,29 +391,41 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           other.id == this.id &&
           other.surahNumber == this.surahNumber &&
           other.ayahNumber == this.ayahNumber &&
+          other.juzNumber == this.juzNumber &&
+          other.hizbNumber == this.hizbNumber &&
           other.verseText == this.verseText &&
-          other.translation == this.translation);
+          other.translation == this.translation &&
+          other.reading == this.reading);
 }
 
 class QuranCompanion extends UpdateCompanion<QuranData> {
   final Value<int> id;
   final Value<int> surahNumber;
   final Value<int> ayahNumber;
+  final Value<int?> juzNumber;
+  final Value<int?> hizbNumber;
   final Value<String> verseText;
   final Value<String?> translation;
+  final Value<String> reading;
   const QuranCompanion({
     this.id = const Value.absent(),
     this.surahNumber = const Value.absent(),
     this.ayahNumber = const Value.absent(),
+    this.juzNumber = const Value.absent(),
+    this.hizbNumber = const Value.absent(),
     this.verseText = const Value.absent(),
     this.translation = const Value.absent(),
+    this.reading = const Value.absent(),
   });
   QuranCompanion.insert({
     this.id = const Value.absent(),
     required int surahNumber,
     required int ayahNumber,
+    this.juzNumber = const Value.absent(),
+    this.hizbNumber = const Value.absent(),
     required String verseText,
     this.translation = const Value.absent(),
+    this.reading = const Value.absent(),
   }) : surahNumber = Value(surahNumber),
        ayahNumber = Value(ayahNumber),
        verseText = Value(verseText);
@@ -306,15 +433,21 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Expression<int>? id,
     Expression<int>? surahNumber,
     Expression<int>? ayahNumber,
+    Expression<int>? juzNumber,
+    Expression<int>? hizbNumber,
     Expression<String>? verseText,
     Expression<String>? translation,
+    Expression<String>? reading,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (surahNumber != null) 'surah_number': surahNumber,
       if (ayahNumber != null) 'ayah_number': ayahNumber,
+      if (juzNumber != null) 'juz_number': juzNumber,
+      if (hizbNumber != null) 'hizb_number': hizbNumber,
       if (verseText != null) 'verse_text': verseText,
       if (translation != null) 'translation': translation,
+      if (reading != null) 'reading': reading,
     });
   }
 
@@ -322,15 +455,21 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Value<int>? id,
     Value<int>? surahNumber,
     Value<int>? ayahNumber,
+    Value<int?>? juzNumber,
+    Value<int?>? hizbNumber,
     Value<String>? verseText,
     Value<String?>? translation,
+    Value<String>? reading,
   }) {
     return QuranCompanion(
       id: id ?? this.id,
       surahNumber: surahNumber ?? this.surahNumber,
       ayahNumber: ayahNumber ?? this.ayahNumber,
+      juzNumber: juzNumber ?? this.juzNumber,
+      hizbNumber: hizbNumber ?? this.hizbNumber,
       verseText: verseText ?? this.verseText,
       translation: translation ?? this.translation,
+      reading: reading ?? this.reading,
     );
   }
 
@@ -346,11 +485,20 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     if (ayahNumber.present) {
       map['ayah_number'] = Variable<int>(ayahNumber.value);
     }
+    if (juzNumber.present) {
+      map['juz_number'] = Variable<int>(juzNumber.value);
+    }
+    if (hizbNumber.present) {
+      map['hizb_number'] = Variable<int>(hizbNumber.value);
+    }
     if (verseText.present) {
       map['verse_text'] = Variable<String>(verseText.value);
     }
     if (translation.present) {
       map['translation'] = Variable<String>(translation.value);
+    }
+    if (reading.present) {
+      map['reading'] = Variable<String>(reading.value);
     }
     return map;
   }
@@ -361,8 +509,11 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
           ..write('id: $id, ')
           ..write('surahNumber: $surahNumber, ')
           ..write('ayahNumber: $ayahNumber, ')
+          ..write('juzNumber: $juzNumber, ')
+          ..write('hizbNumber: $hizbNumber, ')
           ..write('verseText: $verseText, ')
-          ..write('translation: $translation')
+          ..write('translation: $translation, ')
+          ..write('reading: $reading')
           ..write(')'))
         .toString();
   }
@@ -1766,16 +1917,22 @@ typedef $$QuranTableCreateCompanionBuilder =
       Value<int> id,
       required int surahNumber,
       required int ayahNumber,
+      Value<int?> juzNumber,
+      Value<int?> hizbNumber,
       required String verseText,
       Value<String?> translation,
+      Value<String> reading,
     });
 typedef $$QuranTableUpdateCompanionBuilder =
     QuranCompanion Function({
       Value<int> id,
       Value<int> surahNumber,
       Value<int> ayahNumber,
+      Value<int?> juzNumber,
+      Value<int?> hizbNumber,
       Value<String> verseText,
       Value<String?> translation,
+      Value<String> reading,
     });
 
 class $$QuranTableFilterComposer extends Composer<_$AppDatabase, $QuranTable> {
@@ -1801,6 +1958,16 @@ class $$QuranTableFilterComposer extends Composer<_$AppDatabase, $QuranTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get juzNumber => $composableBuilder(
+    column: $table.juzNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get hizbNumber => $composableBuilder(
+    column: $table.hizbNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get verseText => $composableBuilder(
     column: $table.verseText,
     builder: (column) => ColumnFilters(column),
@@ -1808,6 +1975,11 @@ class $$QuranTableFilterComposer extends Composer<_$AppDatabase, $QuranTable> {
 
   ColumnFilters<String> get translation => $composableBuilder(
     column: $table.translation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reading => $composableBuilder(
+    column: $table.reading,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1836,6 +2008,16 @@ class $$QuranTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get juzNumber => $composableBuilder(
+    column: $table.juzNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get hizbNumber => $composableBuilder(
+    column: $table.hizbNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get verseText => $composableBuilder(
     column: $table.verseText,
     builder: (column) => ColumnOrderings(column),
@@ -1843,6 +2025,11 @@ class $$QuranTableOrderingComposer
 
   ColumnOrderings<String> get translation => $composableBuilder(
     column: $table.translation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reading => $composableBuilder(
+    column: $table.reading,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1869,6 +2056,14 @@ class $$QuranTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get juzNumber =>
+      $composableBuilder(column: $table.juzNumber, builder: (column) => column);
+
+  GeneratedColumn<int> get hizbNumber => $composableBuilder(
+    column: $table.hizbNumber,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get verseText =>
       $composableBuilder(column: $table.verseText, builder: (column) => column);
 
@@ -1876,6 +2071,9 @@ class $$QuranTableAnnotationComposer
     column: $table.translation,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get reading =>
+      $composableBuilder(column: $table.reading, builder: (column) => column);
 }
 
 class $$QuranTableTableManager
@@ -1909,28 +2107,40 @@ class $$QuranTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> surahNumber = const Value.absent(),
                 Value<int> ayahNumber = const Value.absent(),
+                Value<int?> juzNumber = const Value.absent(),
+                Value<int?> hizbNumber = const Value.absent(),
                 Value<String> verseText = const Value.absent(),
                 Value<String?> translation = const Value.absent(),
+                Value<String> reading = const Value.absent(),
               }) => QuranCompanion(
                 id: id,
                 surahNumber: surahNumber,
                 ayahNumber: ayahNumber,
+                juzNumber: juzNumber,
+                hizbNumber: hizbNumber,
                 verseText: verseText,
                 translation: translation,
+                reading: reading,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int surahNumber,
                 required int ayahNumber,
+                Value<int?> juzNumber = const Value.absent(),
+                Value<int?> hizbNumber = const Value.absent(),
                 required String verseText,
                 Value<String?> translation = const Value.absent(),
+                Value<String> reading = const Value.absent(),
               }) => QuranCompanion.insert(
                 id: id,
                 surahNumber: surahNumber,
                 ayahNumber: ayahNumber,
+                juzNumber: juzNumber,
+                hizbNumber: hizbNumber,
                 verseText: verseText,
                 translation: translation,
+                reading: reading,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

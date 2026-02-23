@@ -36,6 +36,8 @@ class DataDownloadService {
               QuranCompanion.insert(
                 surahNumber: surahNumber,
                 ayahNumber: ayah['numberInSurah'] as int,
+                juzNumber: Value(ayah['juz'] as int),
+                hizbNumber: Value(ayah['hizbQuarter'] as int),
                 verseText: ayah['text'] as String,
               )
           ]);

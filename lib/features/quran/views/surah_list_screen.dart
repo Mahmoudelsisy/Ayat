@@ -120,6 +120,8 @@ class QuranSearchDelegate extends SearchDelegate {
   Widget buildSuggestions(BuildContext context) => Container();
 }
 
+final quranNavigationTabProvider = StateProvider<int>((ref) => 0);
+
 class SurahListScreen extends ConsumerWidget {
   const SurahListScreen({super.key});
 
@@ -140,41 +142,136 @@ class SurahListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final surahsAsync = ref.watch(surahListProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('القرآن الكريم'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(context: context, delegate: QuranSearchDelegate());
-            },
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('القرآن الكريم'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'السور'),
+              Tab(text: 'الأجزاء'),
+              Tab(text: 'الأحزاب'),
+            ],
           ),
-        ],
-      ),
-      body: surahsAsync.when(
-        data: (surahNumbers) => ListView.builder(
-          itemCount: surahNumbers.length,
-          itemBuilder: (context, index) {
-            final number = surahNumbers[index];
-            return ListTile(
-              leading: CircleAvatar(child: Text(number.toString())),
-              title: Text(surahNames[number - 1]),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SurahDetailScreen(surahNumber: number, surahName: surahNames[number - 1]),
-                  ),
-                );
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                showSearch(context: context, delegate: QuranSearchDelegate());
               },
+            ),
+          ],
+        ),
+        body: const TabBarView(
+          children: [
+            SurahTabView(),
+            JuzTabView(),
+            HizbTabView(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SurahTabView extends ConsumerWidget {
+  const SurahTabView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final surahsAsync = ref.watch(surahListProvider);
+    const surahNames = [
+      "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
+      "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
+      "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
+      "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
+      "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
+      "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
+      "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
+      "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
+      "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
+      "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
+      "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر",
+      "المسد", "الإخلاص", "الفلق", "الناس"
+    ];
+
+    return surahsAsync.when(
+      data: (surahNumbers) => ListView.builder(
+        itemCount: surahNumbers.length,
+        itemBuilder: (context, index) {
+          final number = surahNumbers[index];
+          return ListTile(
+            leading: CircleAvatar(child: Text(number.toString())),
+            title: Text(surahNames[number - 1]),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SurahDetailScreen(surahNumber: number, surahName: surahNames[number - 1]),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('خطأ: $err')),
+    );
+  }
+}
+
+class JuzTabView extends ConsumerWidget {
+  const JuzTabView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListView.builder(
+      itemCount: 30,
+      itemBuilder: (context, index) {
+        final juzNumber = index + 1;
+        return ListTile(
+          leading: CircleAvatar(child: Text(juzNumber.toString())),
+          title: Text('الجزء $juzNumber'),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SurahDetailScreen(
+                  surahName: 'الجزء $juzNumber',
+                  filter: QuranFilter(QuranFilterType.juz, juzNumber, 'الجزء $juzNumber'),
+                ),
+              ),
             );
           },
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('خطأ: $err')),
-      ),
+        );
+      },
+    );
+  }
+}
+
+class HizbTabView extends ConsumerWidget {
+  const HizbTabView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListView.builder(
+      itemCount: 60,
+      itemBuilder: (context, index) {
+        final hizbNumber = index + 1;
+        return ListTile(
+          leading: CircleAvatar(child: Text(hizbNumber.toString())),
+          title: Text('الحزب $hizbNumber'),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SurahDetailScreen(
+                  surahName: 'الحزب $hizbNumber',
+                  filter: QuranFilter(QuranFilterType.hizb, hizbNumber, 'الحزب $hizbNumber'),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -12,8 +12,11 @@ class Quran extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get surahNumber => integer()();
   IntColumn get ayahNumber => integer()();
+  IntColumn get juzNumber => integer().nullable()();
+  IntColumn get hizbNumber => integer().nullable()();
   TextColumn get verseText => text()();
   TextColumn get translation => text().nullable()();
+  TextColumn get reading => text().withDefault(const Constant('hafs'))();
 }
 
 class Tafsirs extends Table {

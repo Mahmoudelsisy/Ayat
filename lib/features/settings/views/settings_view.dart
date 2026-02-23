@@ -35,6 +35,31 @@ class SettingsView extends ConsumerWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.menu_book),
+            title: const Text('رواية القراءة'),
+            subtitle: const Text('حفص عن عاصم'),
+            onTap: () {
+              // Show dialog to select reading
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('اختر الرواية'),
+                  content: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(title: Text('حفص عن عاصم'), trailing: Icon(Icons.check, color: Colors.green)),
+                      ListTile(title: Text('ورش عن نافع (قريباً)')),
+                      ListTile(title: Text('قالون عن نافع (قريباً)')),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('إغلاق')),
+                  ],
+                ),
+              );
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.language),
             title: const Text('اللغة'),
             subtitle: const Text('العربية'),

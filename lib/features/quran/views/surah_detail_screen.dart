@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:drift/drift.dart' hide Column;
 import '../../../main.dart';
 import '../../../core/database/database.dart';
 import '../../tafsir/providers/tafsir_provider.dart';
@@ -9,16 +10,50 @@ import '../../../core/services/audio_download_service.dart';
 import '../../../shared/providers/font_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-final surahContentProvider = FutureProvider.family<List<QuranData>, int>((ref, surahNumber) async {
+enum QuranFilterType { surah, juz, hizb }
+
+class QuranFilter {
+  final QuranFilterType type;
+  final int value;
+  final String name;
+  QuranFilter(this.type, this.value, this.name);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QuranFilter && runtimeType == other.runtimeType && type == other.type && value == other.value;
+
+  @override
+  int get hashCode => type.hashCode ^ value.hashCode;
+}
+
+final quranContentProvider = FutureProvider.family<List<QuranData>, QuranFilter>((ref, filter) async {
   final db = ref.read(databaseProvider);
-  return await (db.select(db.quran)..where((t) => t.surahNumber.equals(surahNumber))).get();
+  switch (filter.type) {
+    case QuranFilterType.surah:
+      return await (db.select(db.quran)..where((t) => t.surahNumber.equals(filter.value))).get();
+    case QuranFilterType.juz:
+      return await (db.select(db.quran)..where((t) => t.juzNumber.equals(filter.value))).get();
+    case QuranFilterType.hizb:
+      // Hizb here is hizbQuarter. We want the full Hizb (4 quarters).
+      // If user selected Hizb 1, it corresponds to quarters 1, 2, 3, 4.
+      final start = (filter.value - 1) * 4 + 1;
+      final end = filter.value * 4;
+      return await (db.select(db.quran)..where((t) => t.hizbNumber.isBetween(Variable(start), Variable(end)))).get();
+  }
 });
 
 class SurahDetailScreen extends ConsumerStatefulWidget {
-  final int surahNumber;
+  final int? surahNumber;
   final String surahName;
+  final QuranFilter? filter;
 
-  const SurahDetailScreen({super.key, required this.surahNumber, required this.surahName});
+  const SurahDetailScreen({
+    super.key,
+    this.surahNumber,
+    required this.surahName,
+    this.filter,
+  });
 
   @override
   ConsumerState<SurahDetailScreen> createState() => _SurahDetailScreenState();
@@ -54,9 +89,13 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     });
   }
 
+  QuranFilter get _currentFilter => widget.filter ?? QuranFilter(QuranFilterType.surah, widget.surahNumber!, widget.surahName);
+
   Future<void> _checkIfDownloaded() async {
+    final sNum = widget.surahNumber;
+    if (sNum == null) return;
     final reciter = ref.read(selectedReciterProvider);
-    final downloaded = await _downloadService.isSurahDownloaded(widget.surahNumber, reciter.id);
+    final downloaded = await _downloadService.isSurahDownloaded(sNum, reciter.id);
     if (mounted) {
       setState(() => _isDownloaded = downloaded);
     }
@@ -64,8 +103,10 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   }
 
   Future<void> _saveLastRead() async {
+    final sNum = widget.surahNumber;
+    if (sNum == null) return;
     final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setInt('last_surah_number', widget.surahNumber);
+    await prefs.setInt('last_surah_number', sNum);
     await prefs.setString('last_surah_name', widget.surahName);
   }
 
@@ -82,7 +123,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       final reciter = ref.read(selectedReciterProvider);
 
       try {
-        final ayahs = await ref.read(surahContentProvider(widget.surahNumber).future);
+        final ayahs = await ref.read(quranContentProvider(_currentFilter).future);
         final playlist = ConcatenatingAudioSource(
           children: ayahs.map((ayah) {
             // Using Islamic Network for Ayah-by-Ayah URLs
@@ -97,7 +138,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             // Let's stick to the whole surah for now if highlighting is too complex without timing data,
             // OR I can use the alquran.cloud API to get all ayah URLs.
 
-            final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(widget.surahNumber, ayah.ayahNumber)}.mp3';
+            final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(ayah.surahNumber, ayah.ayahNumber)}.mp3';
             return AudioSource.uri(Uri.parse(url));
           }).toList(),
         );
@@ -123,8 +164,10 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   ];
 
   Future<void> _downloadSurah() async {
+    final sNum = widget.surahNumber;
+    if (sNum == null) return;
     final reciter = ref.read(selectedReciterProvider);
-    final url = '${reciter.surahServer}${widget.surahNumber.toString().padLeft(3, '0')}.mp3';
+    final url = '${reciter.surahServer}${sNum.toString().padLeft(3, '0')}.mp3';
 
     setState(() {
       _isDownloading = true;
@@ -132,7 +175,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     });
 
     try {
-      await _downloadService.downloadSurah(widget.surahNumber, reciter.id, url, (progress) {
+      await _downloadService.downloadSurah(sNum, reciter.id, url, (progress) {
         if (mounted) {
           setState(() => _downloadProgress = progress);
         }
@@ -214,7 +257,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ayahsAsync = ref.watch(surahContentProvider(widget.surahNumber));
+    final ayahsAsync = ref.watch(quranContentProvider(_currentFilter));
 
     final selectedFont = ref.watch(selectedFontProvider);
 
@@ -226,7 +269,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             icon: const Icon(Icons.font_download),
             onPressed: () => _showFontSelection(),
           ),
-          if (!_isDownloaded)
+          if (widget.surahNumber != null && !_isDownloaded)
             _isDownloading
                 ? Center(
                     child: Padding(
