@@ -23,14 +23,20 @@ class _TasbeehViewState extends State<TasbeehView> {
     {'text': 'اللهم صل وسلم على نبينا محمد', 'target': 100},
   ];
 
+  double _scale = 1.0;
+
   void _increment() {
     HapticFeedback.vibrate();
     setState(() {
       _counter++;
+      _scale = 0.95;
       if (_counter == _target) {
         HapticFeedback.heavyImpact();
         _showCompletionDialog();
       }
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) setState(() => _scale = 1.0);
     });
   }
 
@@ -105,7 +111,10 @@ class _TasbeehViewState extends State<TasbeehView> {
                   const SizedBox(height: 40),
                   GestureDetector(
                     onTap: _increment,
-                    child: Container(
+                    child: AnimatedScale(
+                      scale: _scale,
+                      duration: const Duration(milliseconds: 100),
+                      child: Container(
                       width: 250,
                       height: 250,
                       decoration: BoxDecoration(
@@ -131,6 +140,7 @@ class _TasbeehViewState extends State<TasbeehView> {
                           style: const TextStyle(fontSize: 64, color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
+                    ),
                     ),
                   ),
                 ],

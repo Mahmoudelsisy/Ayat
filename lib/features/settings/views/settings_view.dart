@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import '../../prayer_times/providers/prayer_settings_provider.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import '../../../shared/providers/font_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
 import '../../../core/services/data_download_service.dart';
+import '../../../core/services/backup_service.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
@@ -273,6 +276,35 @@ class SettingsView extends ConsumerWidget {
             title: const Text('اللغة'),
             subtitle: const Text('العربية'),
             onTap: () {},
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.backup),
+            title: const Text('نسخة احتياطية'),
+            subtitle: const Text('تصدير بياناتك (الختمة، العلامات، التقدم)'),
+            onTap: () async {
+              final db = ref.read(databaseProvider);
+              await BackupService(db).exportBackup();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.restore),
+            title: const Text('استعادة البيانات'),
+            subtitle: const Text('استيراد ملف نسخة احتياطية سابق'),
+            onTap: () async {
+              FilePickerResult? result = await FilePicker.platform.pickFiles();
+              if (result != null) {
+                final file = File(result.files.single.path!);
+                final content = await file.readAsString();
+                final db = ref.read(databaseProvider);
+                final success = await BackupService(db).importBackup(content);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(success ? 'تمت الاستعادة بنجاح' : 'فشلت الاستعادة، الملف غير صالح')),
+                  );
+                }
+              }
+            },
           ),
           const Divider(),
           ListTile(

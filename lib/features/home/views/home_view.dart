@@ -17,6 +17,8 @@ import 'allah_names_screen.dart';
 import 'khatma_planner_screen.dart';
 import '../../stats/views/achievements_screen.dart';
 import '../../modes/views/ramadan_view.dart';
+import '../../../shared/widgets/fade_in_widget.dart';
+import '../../search/views/search_view.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -179,6 +181,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
       appBar: AppBar(
         title: const Text('آيات', style: TextStyle(fontFamily: 'Reem Kufi', fontSize: 28)),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchView())),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -194,44 +202,47 @@ class _HomeViewState extends ConsumerState<HomeView> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            if (_nextPrayerName.isNotEmpty) _buildCountdownCard(),
+            if (_nextPrayerName.isNotEmpty) FadeInWidget(delay: const Duration(milliseconds: 100), child: _buildCountdownCard()),
           const SizedBox(height: 20),
           if (lastSurahNum != null) ...[
-            _buildLastReadCard(context, lastSurahNum, lastSurahName!),
+            FadeInWidget(delay: const Duration(milliseconds: 200), child: _buildLastReadCard(context, lastSurahNum, lastSurahName!)),
             const SizedBox(height: 20),
           ],
-          _buildDailyVerse(ref),
+          FadeInWidget(delay: const Duration(milliseconds: 300), child: _buildDailyVerse(ref)),
           const SizedBox(height: 10),
-          _buildSpiritualTip(ref),
+          FadeInWidget(delay: const Duration(milliseconds: 400), child: _buildSpiritualTip(ref)),
           const SizedBox(height: 20),
-          _buildDuaOfDay(ref),
+          FadeInWidget(delay: const Duration(milliseconds: 500), child: _buildDuaOfDay(ref)),
           const SizedBox(height: 20),
-          _buildSpiritualChecklist(),
+          FadeInWidget(delay: const Duration(milliseconds: 600), child: _buildSpiritualChecklist()),
           const SizedBox(height: 20),
-          _buildCommitmentStats(),
+          FadeInWidget(delay: const Duration(milliseconds: 700), child: _buildCommitmentStats()),
           const SizedBox(height: 20),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const Text('تقدم الختمة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  readCountAsync.when(
-                    data: (count) {
-                      final progress = count / totalAyahs;
-                      return Column(
-                        children: [
-                          LinearProgressIndicator(value: progress, minHeight: 10),
-                          const SizedBox(height: 10),
-                          Text('تمت قراءة $count من $totalAyahs آية (${(progress * 100).toStringAsFixed(1)}%)'),
-                        ],
-                      );
-                    },
-                    loading: () => const CircularProgressIndicator(),
-                    error: (err, stack) => Text('خطأ: $err'),
-                  ),
-                ],
+          FadeInWidget(
+            delay: const Duration(milliseconds: 800),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Text('تقدم الختمة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    readCountAsync.when(
+                      data: (count) {
+                        final progress = count / totalAyahs;
+                        return Column(
+                          children: [
+                            LinearProgressIndicator(value: progress, minHeight: 10),
+                            const SizedBox(height: 10),
+                            Text('تمت قراءة $count من $totalAyahs آية (${(progress * 100).toStringAsFixed(1)}%)'),
+                          ],
+                        );
+                      },
+                      loading: () => const CircularProgressIndicator(),
+                      error: (err, stack) => Text('خطأ: $err'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -57,6 +57,7 @@ dependencies:
   fl_chart: ^0.70.2
   share_plus: ^10.1.4
   flutter_heatmap_calendar: ^1.0.5
+  file_picker: ^8.0.0
 
 dev_dependencies:
   flutter_test:
