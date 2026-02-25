@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../shared/providers/font_provider.dart';
+import '../../../shared/providers/digits_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
 import '../../../core/services/data_download_service.dart';
 import '../../../core/services/backup_service.dart';
@@ -276,6 +277,16 @@ class SettingsView extends ConsumerWidget {
               final prefs = ref.read(sharedPreferencesProvider);
               prefs.setBool('is_locked', val);
               ref.read(isAppLockedProvider.notifier).state = val;
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.pin),
+            title: const Text('الأرقام العربية (١٢٣)'),
+            value: ref.watch(arabicDigitsProvider),
+            onChanged: (val) {
+              final prefs = ref.read(sharedPreferencesProvider);
+              prefs.setBool('arabic_digits', val);
+              ref.read(arabicDigitsProvider.notifier).state = val;
             },
           ),
           ListTile(

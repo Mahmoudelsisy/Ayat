@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../prayer_times/providers/prayer_times_provider.dart';
-import '../../azkar/views/azkar_list_screen.dart';
 import '../views/itikaf_screen.dart';
 import '../../home/views/khatma_planner_screen.dart';
+import '../../azkar/views/ruqyah_screen.dart';
 
 class RamadanView extends ConsumerStatefulWidget {
   const RamadanView({super.key});
@@ -100,11 +100,11 @@ class _RamadanViewState extends ConsumerState<RamadanView> {
             const SizedBox(height: 16),
             _buildActionCard(
               context,
-              'أذكار الصائم',
-              'أدعية وأذكار مأثورة للصائم',
+              'أذكار الصائم والرقية',
+              'أدعية مأثورة ورقيه شرعية',
               Icons.favorite,
               Colors.redAccent,
-              const AzkarListScreen(category: 'أذكار الصباح'), // Placeholder, should be specific
+              RuqyahScreen(),
             ),
             const SizedBox(height: 16),
             _buildActionCard(

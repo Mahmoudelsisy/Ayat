@@ -33,21 +33,25 @@ class AudioDownloadService {
     final file = File(path);
 
     final client = http.Client();
-    final request = http.Request('GET', Uri.parse(url));
-    final response = await client.send(request);
+    try {
+      final request = http.Request('GET', Uri.parse(url));
+      final response = await client.send(request);
 
-    final contentLength = response.contentLength ?? 0;
-    var downloadedLength = 0;
+      final contentLength = response.contentLength ?? 0;
+      var downloadedLength = 0;
 
-    final bytes = <int>[];
-    await response.stream.forEach((chunk) {
-      bytes.addAll(chunk);
-      downloadedLength += chunk.length;
-      if (contentLength > 0) {
-        onProgress(downloadedLength / contentLength);
-      }
-    });
+      final bytes = <int>[];
+      await response.stream.forEach((chunk) {
+        bytes.addAll(chunk);
+        downloadedLength += chunk.length;
+        if (contentLength > 0) {
+          onProgress(downloadedLength / contentLength);
+        }
+      });
 
-    await file.writeAsBytes(bytes);
+      await file.writeAsBytes(bytes);
+    } finally {
+      client.close();
+    }
   }
 }

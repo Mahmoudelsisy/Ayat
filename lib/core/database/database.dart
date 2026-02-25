@@ -153,8 +153,9 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(
       file,
       setup: (db) {
-        // In a real app, use a key from Secure Storage
-        // db.execute("PRAGMA key = 'my_secure_key'");
+        // We use a fixed key for demonstration.
+        // In a real production app, this should be fetched from Secure Storage.
+        db.execute("PRAGMA key = 'ayat_secure_key_2025'");
       },
     );
   });

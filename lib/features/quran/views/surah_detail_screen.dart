@@ -13,6 +13,7 @@ import '../../../shared/providers/reading_provider.dart';
 import '../../../shared/providers/reading_theme_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/mushaf_view.dart';
+import 'dart:io';
 
 enum QuranFilterType { surah, juz, hizb }
 
@@ -204,10 +205,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       try {
         final ayahs = await ref.read(quranContentProvider(_currentFilter).future);
         final playlist = ConcatenatingAudioSource(
-          children: ayahs.map((ayah) {
+          children: await Future.wait(ayahs.map((ayah) async {
+            final localPath = await _downloadService.getAyahPath(ayah.surahNumber, ayah.ayahNumber, reciter.id);
+            if (File(localPath).existsSync()) {
+              return AudioSource.file(localPath);
+            }
             final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(ayah.surahNumber, ayah.ayahNumber)}.mp3';
             return AudioSource.uri(Uri.parse(url));
-          }).toList(),
+          })),
         );
 
         await _audioPlayer.setAudioSource(playlist);

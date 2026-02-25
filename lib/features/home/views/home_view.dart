@@ -20,6 +20,7 @@ import '../../azkar/views/ruqyah_screen.dart';
 import '../../modes/views/ramadan_view.dart';
 import '../../../shared/widgets/fade_in_widget.dart';
 import '../../search/views/search_view.dart';
+import '../../../shared/providers/digits_provider.dart';
 
 final readAyahsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.read(databaseProvider);
@@ -214,7 +215,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('آيات', style: TextStyle(fontFamily: 'Reem Kufi', fontSize: 28)),
+        title: Row(
+          children: [
+            Image.asset('assets/images/Logo.png', height: 35),
+            const SizedBox(width: 10),
+            const Text('آيات', style: TextStyle(fontFamily: 'Reem Kufi', fontSize: 28)),
+          ],
+        ),
         elevation: 0,
         actions: [
           IconButton(
@@ -519,6 +526,27 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   Widget _buildCountdownCard() {
+    final prayerTimesAsync = ref.watch(prayerTimesProvider);
+    double progress = 0;
+    prayerTimesAsync.whenData((times) {
+      final now = DateTime.now();
+      final current = times.currentPrayer();
+      final next = times.nextPrayer();
+
+      // We calculate progress between previous prayer and next prayer
+      final startTime = times.timeForPrayer(current) ?? now.subtract(const Duration(hours: 3));
+      DateTime endTime = times.timeForPrayer(next) ?? now.add(const Duration(hours: 3));
+
+      // If next prayer is Fajr tomorrow
+      if (endTime.isBefore(startTime)) {
+        endTime = endTime.add(const Duration(days: 1));
+      }
+
+      final total = endTime.difference(startTime).inSeconds;
+      final elapsed = now.difference(startTime).inSeconds;
+      progress = (elapsed / total).clamp(0.0, 1.0);
+    });
+
     return Card(
       elevation: 8,
       shadowColor: Colors.black45,
@@ -530,24 +558,46 @@ class _HomeViewState extends ConsumerState<HomeView> {
           gradient: const LinearGradient(colors: [Color(0xFF263238), Color(0xFF455A64)]),
         ),
         child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text('الوقت المتبقي لصلاة $_nextPrayerName', style: const TextStyle(color: Colors.white70, fontSize: 16)),
-            const SizedBox(height: 10),
-            Text(
-              _formatDuration(_timeLeft),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-                fontFamily: 'monospace',
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('صلاة $_nextPrayerName القادمة', style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                  const SizedBox(height: 10),
+                  Text(
+                    _formatDuration(_timeLeft).toArabicDigits(ref.watch(arabicDigitsProvider)),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              SizedBox(
+                width: 70,
+                height: 70,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 8,
+                      backgroundColor: Colors.white10,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                    ),
+                    const Center(child: Icon(Icons.mosque, color: Colors.white54)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -601,6 +651,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final items = [
       {'key': 'checklist_duha', 'label': 'صلاة الضحى'},
       {'key': 'checklist_witr', 'label': 'صلاة الوتر'},
+      {'key': 'checklist_morning_azkar', 'label': 'أذكار الصباح'},
+      {'key': 'checklist_evening_azkar', 'label': 'أذكار المساء'},
+      {'key': 'checklist_quran', 'label': 'ورد القرآن اليومي'},
       {'key': 'checklist_kahf', 'label': 'سورة الكهف (الجمعة)', 'only_friday': true},
       {'key': 'checklist_charity', 'label': 'صدقة اليوم'},
     ];

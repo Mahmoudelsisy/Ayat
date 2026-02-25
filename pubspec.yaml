@@ -37,6 +37,7 @@ dependencies:
   adhan: any
   drift: any
   sqlite3_flutter_libs: any
+  sqlcipher_flutter_libs: any
   path_provider: any
   path: any
   http: any
