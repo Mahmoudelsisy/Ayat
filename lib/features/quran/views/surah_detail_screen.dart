@@ -14,6 +14,7 @@ import '../../../shared/providers/reading_theme_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/mushaf_view.dart';
 import 'dart:io';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 enum QuranFilterType { surah, juz, hizb }
 
@@ -52,12 +53,14 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
   final int? surahNumber;
   final String surahName;
   final QuranFilter? filter;
+  final int? initialAyahNumber;
 
   const SurahDetailScreen({
     super.key,
     this.surahNumber,
     required this.surahName,
     this.filter,
+    this.initialAyahNumber,
   });
 
   @override
@@ -66,6 +69,8 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   late AudioPlayer _audioPlayer;
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
   bool _isPlaying = false;
   bool _isParallelMode = false;
   LoopMode _loopMode = LoopMode.off;
@@ -464,7 +469,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       body: _isMushafMode && widget.surahNumber != null
           ? MushafView(surahNumber: widget.surahNumber!)
           : ayahsAsync.when(
-        data: (ayahs) => ListView.builder(
+        data: (ayahs) => ScrollablePositionedList.builder(
+          itemScrollController: _itemScrollController,
+          itemPositionsListener: _itemPositionsListener,
+          initialScrollIndex: widget.initialAyahNumber != null
+              ? ayahs.indexWhere((a) => a.ayahNumber == widget.initialAyahNumber).clamp(0, ayahs.length - 1)
+              : 0,
           padding: const EdgeInsets.all(16),
           itemCount: ayahs.length,
           itemBuilder: (context, index) {

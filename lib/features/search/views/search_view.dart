@@ -108,6 +108,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 surahNumber: ayah.surahNumber,
                 surahName: 'سورة ${ayah.surahNumber}',
                 filter: QuranFilter(QuranFilterType.surah, ayah.surahNumber, 'سورة ${ayah.surahNumber}'),
+                initialAyahNumber: ayah.ayahNumber,
               ),
             ));
           },
@@ -136,6 +137,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
                 surahNumber: tafsir.surahNumber,
                 surahName: 'سورة ${tafsir.surahNumber}',
                 filter: QuranFilter(QuranFilterType.surah, tafsir.surahNumber, 'سورة ${tafsir.surahNumber}'),
+                initialAyahNumber: tafsir.ayahNumber,
               ),
             ));
           },

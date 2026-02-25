@@ -42,6 +42,7 @@ dependencies:
   path: any
   http: any
   just_audio: any
+  scrollable_positioned_list: any
   flutter_qiblah: any
   hijri: any
   shared_preferences: any
