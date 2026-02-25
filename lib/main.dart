@@ -76,7 +76,7 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
 
 final themeColorProvider = StateProvider<Color>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
-  final colorValue = prefs.getInt('theme_color') ?? AppTheme.islamicGreen.value;
+  final colorValue = prefs.getInt('theme_color') ?? AppTheme.islamicGreen.toARGB32();
   return Color(colorValue);
 });
 

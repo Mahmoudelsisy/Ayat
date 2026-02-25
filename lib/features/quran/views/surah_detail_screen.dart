@@ -94,10 +94,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
 
   void _listenToPlayback() {
     _audioPlayer.currentIndexStream.listen((index) {
-      if (mounted) {
+      if (mounted && index != null) {
         setState(() {
           if (_currentAyahIndex != index) {
             _currentRepeatIndex = 0;
+            // Scroll to the current playing ayah
+            if (_itemScrollController.isAttached) {
+              _itemScrollController.scrollTo(
+                index: index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+              );
+            }
           }
           _currentAyahIndex = index;
         });
@@ -209,18 +217,16 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
 
       try {
         final ayahs = await ref.read(quranContentProvider(_currentFilter).future);
-        final playlist = ConcatenatingAudioSource(
-          children: await Future.wait(ayahs.map((ayah) async {
-            final localPath = await _downloadService.getAyahPath(ayah.surahNumber, ayah.ayahNumber, reciter.id);
-            if (File(localPath).existsSync()) {
-              return AudioSource.file(localPath);
-            }
-            final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(ayah.surahNumber, ayah.ayahNumber)}.mp3';
-            return AudioSource.uri(Uri.parse(url));
-          })),
-        );
+        final playlist = await Future.wait(ayahs.map((ayah) async {
+          final localPath = await _downloadService.getAyahPath(ayah.surahNumber, ayah.ayahNumber, reciter.id);
+          if (File(localPath).existsSync()) {
+            return AudioSource.file(localPath);
+          }
+          final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/${_getAbsoluteAyahNumber(ayah.surahNumber, ayah.ayahNumber)}.mp3';
+          return AudioSource.uri(Uri.parse(url));
+        }));
 
-        await _audioPlayer.setAudioSource(playlist);
+        await _audioPlayer.setAudioSources(playlist);
         await _audioPlayer.play();
       } catch (e) {
         if (mounted) {
