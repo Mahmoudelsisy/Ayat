@@ -118,6 +118,31 @@ class SettingsView extends ConsumerWidget {
     );
   }
 
+  void _showBeforePrayerReminderSelection(BuildContext context, WidgetRef ref) {
+    final options = [0, 5, 10, 15, 20, 30];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تذكير قبل الصلاة'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: options
+              .map((o) => ListTile(
+                    title: Text(o == 0 ? 'بدون تذكير' : '$o دقائق'),
+                    onTap: () {
+                      final prefs = ref.read(sharedPreferencesProvider);
+                      prefs.setInt('before_prayer_reminder', o);
+                      // In a real app, reschedule notifications here
+                      Navigator.pop(context);
+                    },
+                  ))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   void _showMuadhinSelection(BuildContext context, WidgetRef ref) {
     final muadhins = {
       'default': 'الافتراضي',
@@ -213,6 +238,12 @@ class SettingsView extends ConsumerWidget {
             title: const Text('صوت الأذان'),
             subtitle: Text(ref.watch(sharedPreferencesProvider).getString('muadhin') ?? 'الافتراضي'),
             onTap: () => _showMuadhinSelection(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.alarm),
+            title: const Text('التنبيه قبل الصلاة'),
+            subtitle: Text('${ref.watch(sharedPreferencesProvider).getInt('before_prayer_reminder') ?? 10} دقائق'),
+            onTap: () => _showBeforePrayerReminderSelection(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.file_download),
@@ -327,7 +358,14 @@ class SettingsView extends ConsumerWidget {
             leading: const Icon(Icons.star_rate),
             title: const Text('قيّم التطبيق'),
             onTap: () {
-              // Open store URL
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('شكراً لتقييمكم، سيتم فتح المتجر قريباً')));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.feedback),
+            title: const Text('أرسل ملاحظاتك'),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('شكراً لتواصلكم، سيتم فتح البريد الإلكتروني قريباً')));
             },
           ),
           ListTile(

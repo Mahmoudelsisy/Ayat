@@ -16,6 +16,7 @@ import '../../audio/views/audio_comparison_screen.dart';
 import 'allah_names_screen.dart';
 import 'khatma_planner_screen.dart';
 import '../../stats/views/achievements_screen.dart';
+import '../../azkar/views/ruqyah_screen.dart';
 import '../../modes/views/ramadan_view.dart';
 import '../../../shared/widgets/fade_in_widget.dart';
 import '../../search/views/search_view.dart';
@@ -238,6 +239,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
           children: [
             if (_nextPrayerName.isNotEmpty) FadeInWidget(delay: const Duration(milliseconds: 100), child: _buildCountdownCard()),
           const SizedBox(height: 20),
+          FadeInWidget(delay: const Duration(milliseconds: 150), child: _buildPrayerTimesRow()),
+          const SizedBox(height: 20),
           if (lastSurahNum != null) ...[
             FadeInWidget(delay: const Duration(milliseconds: 200), child: _buildLastReadCard(context, lastSurahNum, lastSurahName!)),
             const SizedBox(height: 20),
@@ -297,6 +300,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),
           _buildQuickAction(context, 'أذكار المساء', Icons.nightlight_round, Colors.indigo),
+          _buildQuickAction(context, 'الرقية الشرعية', Icons.security, Colors.teal, destination: const RuqyahScreen()),
           _buildQuickAction(context, 'سورة الكهف', Icons.menu_book, Colors.green),
         ],
       ),
@@ -465,6 +469,52 @@ class _HomeViewState extends ConsumerState<HomeView> {
           Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
+    );
+  }
+
+  Widget _buildPrayerTimesRow() {
+    final prayerTimesAsync = ref.watch(prayerTimesProvider);
+    return prayerTimesAsync.when(
+      data: (times) {
+        final prayers = {
+          'الفجر': times.fajr,
+          'الشروق': times.sunrise,
+          'الظهر': times.dhuhr,
+          'العصر': times.asr,
+          'المغرب': times.maghrib,
+          'العشاء': times.isha,
+        };
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: prayers.entries.map((e) {
+              final isNext = _getPrayerNameArabic(times.nextPrayer()) == e.key;
+              return Container(
+                margin: const EdgeInsets.only(left: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isNext ? Colors.green.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(15),
+                  border: isNext ? Border.all(color: Colors.green) : null,
+                ),
+                child: Column(
+                  children: [
+                    Text(e.key, style: TextStyle(fontWeight: isNext ? FontWeight.bold : FontWeight.normal)),
+                    const SizedBox(height: 5),
+                    Text(
+                      '${e.value.hour.toString().padLeft(2, '0')}:${e.value.minute.toString().padLeft(2, '0')}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+      loading: () => const SizedBox(),
+      error: (e, s) => const SizedBox(),
     );
   }
 
