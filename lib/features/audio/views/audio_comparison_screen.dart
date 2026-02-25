@@ -46,8 +46,34 @@ class _AudioComparisonScreenState extends ConsumerState<AudioComparisonScreen> {
 
   Future<void> _play(int playerNum) async {
     final player = playerNum == 1 ? _player1 : _player2;
+    final otherPlayer = playerNum == 1 ? _player2 : _player1;
     final reciter = playerNum == 1 ? _reciter1 : _reciter2;
+
     if (reciter == null) return;
+
+    if (player.playing) {
+      await player.pause();
+      setState(() {
+        if (playerNum == 1) {
+          _isPlaying1 = false;
+        } else {
+          _isPlaying2 = false;
+        }
+      });
+      return;
+    }
+
+    // Stop other player
+    if (otherPlayer.playing) {
+      await otherPlayer.pause();
+      setState(() {
+        if (playerNum == 1) {
+          _isPlaying2 = false;
+        } else {
+          _isPlaying1 = false;
+        }
+      });
+    }
 
     final absoluteAyah = _getAbsoluteAyahNumber(_selectedSurah, _selectedAyah);
     final url = 'https://cdn.islamic.network/quran/audio/128/${reciter.ayahServerId}/$absoluteAyah.mp3';
@@ -64,6 +90,20 @@ class _AudioComparisonScreenState extends ConsumerState<AudioComparisonScreen> {
           }
         });
       }
+
+      player.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          if (mounted) {
+            setState(() {
+              if (playerNum == 1) {
+                _isPlaying1 = false;
+              } else {
+                _isPlaying2 = false;
+              }
+            });
+          }
+        }
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطأ: $e')));
@@ -75,28 +115,94 @@ class _AudioComparisonScreenState extends ConsumerState<AudioComparisonScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('مقارنة القراء')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green.withValues(alpha: 0.05), Colors.blue.withValues(alpha: 0.05)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(20.0),
           children: [
-            const Text('قارن بين أداء القراء لنفس الآية', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            _buildReciterSelector(1),
-            const SizedBox(height: 10),
-            _buildReciterSelector(2),
-            const SizedBox(height: 30),
+            const Card(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'اختر قارئين للمقارنة بين أدائهما في تلاوة نفس الآية الكريمة، مما يساعدك على اختيار القارئ الأنسب لختمتك.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             _buildAyahSelector(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildPlayerControl(1),
-                _buildPlayerControl(2),
+                Expanded(child: _buildLuxuryPlayer(1)),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('VS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey)),
+                ),
+                Expanded(child: _buildLuxuryPlayer(2)),
               ],
             ),
+            const SizedBox(height: 40),
+            _buildReciterSelector(1),
+            const SizedBox(height: 16),
+            _buildReciterSelector(2),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLuxuryPlayer(int num) {
+    final isPlaying = num == 1 ? _isPlaying1 : _isPlaying2;
+    final reciter = num == 1 ? _reciter1 : _reciter2;
+    final player = num == 1 ? _player1 : _player2;
+
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+          child: Icon(Icons.person, size: 40, color: Theme.of(context).primaryColor),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          reciter?.name ?? 'قارئ $num',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 20),
+        StreamBuilder<Duration>(
+          stream: player.positionStream,
+          builder: (context, snapshot) {
+            final position = snapshot.data ?? Duration.zero;
+            final duration = player.duration ?? Duration.zero;
+            return Column(
+              children: [
+                LinearProgressIndicator(
+                  value: duration.inMilliseconds > 0 ? position.inMilliseconds / duration.inMilliseconds : 0,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                ),
+                const SizedBox(height: 8),
+                IconButton.filled(
+                  iconSize: 32,
+                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                  onPressed: () => _play(num),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -116,43 +222,34 @@ class _AudioComparisonScreenState extends ConsumerState<AudioComparisonScreen> {
   }
 
   Widget _buildAyahSelector() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            initialValue: _selectedSurah.toString(),
-            decoration: const InputDecoration(labelText: 'رقم السورة'),
-            keyboardType: TextInputType.number,
-            onChanged: (val) => _selectedSurah = int.tryParse(val) ?? 1,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: _selectedSurah.toString(),
+              decoration: const InputDecoration(labelText: 'رقم السورة', border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
+              onChanged: (val) => _selectedSurah = int.tryParse(val) ?? 1,
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextFormField(
-            initialValue: _selectedAyah.toString(),
-            decoration: const InputDecoration(labelText: 'رقم الآية'),
-            keyboardType: TextInputType.number,
-            onChanged: (val) => _selectedAyah = int.tryParse(val) ?? 1,
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextFormField(
+              initialValue: _selectedAyah.toString(),
+              decoration: const InputDecoration(labelText: 'رقم الآية', border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
+              onChanged: (val) => _selectedAyah = int.tryParse(val) ?? 1,
+            ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlayerControl(int num) {
-    final isPlaying = num == 1 ? _isPlaying1 : _isPlaying2;
-    final reciter = num == 1 ? _reciter1 : _reciter2;
-
-    return Column(
-      children: [
-        Text(reciter?.name ?? 'اختر قارئ', style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 10),
-        IconButton.filled(
-          iconSize: 40,
-          icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-          onPressed: () => _play(num),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

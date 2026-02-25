@@ -4,6 +4,7 @@ import '../../../main.dart';
 import '../../prayer_times/providers/prayer_settings_provider.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../shared/providers/font_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
 import '../../../core/services/data_download_service.dart';
@@ -315,6 +316,21 @@ class SettingsView extends ConsumerWidget {
           ),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.share),
+            title: const Text('شارك التطبيق'),
+            subtitle: const Text('ساهم في نشر الخير بفضل الله'),
+            onTap: () {
+              Share.share('حمّل تطبيق "آيات" لتجربة إيمانية متكاملة: مواقيت صلاة، قرآن، أذكار، والمزيد بدون إعلانات.\n[رابط متجر التطبيقات]');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.star_rate),
+            title: const Text('قيّم التطبيق'),
+            onTap: () {
+              // Open store URL
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.info),
             title: const Text('عن التطبيق'),
             onTap: () {
@@ -323,6 +339,11 @@ class SettingsView extends ConsumerWidget {
                 applicationName: 'Ayat | آيات',
                 applicationVersion: '1.0.0',
                 applicationIcon: Image.asset('assets/images/Logo.png', width: 50),
+                children: [
+                  const Text('تطبيق آيات هو صدقة جارية تهدف لتقديم تجربة إسلامية متكاملة للمستخدم المسلم، مع التركيز على الخصوصية والعمل بدون إنترنت.'),
+                  const SizedBox(height: 10),
+                  const Text('تم التطوير بكل حب لخدمة كتاب الله وسنة رسوله صلى الله عليه وسلم.'),
+                ],
               );
             },
           ),

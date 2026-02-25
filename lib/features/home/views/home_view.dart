@@ -51,6 +51,40 @@ final todayCommitmentProvider = FutureProvider<DailyCommitmentData?>((ref) async
   return await (db.select(db.dailyCommitment)..where((t) => t.date.isBetweenValues(startOfDay, endOfDay))).getSingleOrNull();
 });
 
+final upcomingFastingProvider = Provider<List<Map<String, dynamic>>>((ref) {
+  final now = DateTime.now();
+  List<Map<String, dynamic>> results = [];
+
+  for (int i = 0; i < 30; i++) {
+    final date = now.add(Duration(days: i));
+    final hDate = HijriCalendar.fromDate(date);
+
+    String? type;
+    if (hDate.hDay == 13 || hDate.hDay == 14 || hDate.hDay == 15) {
+      type = 'الأيام البيض';
+    } else if (date.weekday == DateTime.monday) {
+      type = 'صيام الاثنين';
+    } else if (date.weekday == DateTime.thursday) {
+      type = 'صيام الخميس';
+    } else if (hDate.hMonth == 12 && hDate.hDay == 9) {
+      type = 'يوم عرفة';
+    } else if (hDate.hMonth == 1 && hDate.hDay == 10) {
+      type = 'يوم عاشوراء';
+    }
+
+    if (type != null) {
+      results.add({
+        'date': date,
+        'hijri': '${hDate.hDay} ${hDate.longMonthName}',
+        'type': type,
+      });
+    }
+
+    if (results.length >= 3) break;
+  }
+  return results;
+});
+
 final spiritualTipProvider = Provider<String>((ref) {
   final tips = [
     "ابدأ يومك بذكْر الله لتنعم بالبركة في وقتك.",
@@ -214,12 +248,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
           const SizedBox(height: 20),
           FadeInWidget(delay: const Duration(milliseconds: 500), child: _buildDuaOfDay(ref)),
           const SizedBox(height: 20),
-          FadeInWidget(delay: const Duration(milliseconds: 600), child: _buildSpiritualChecklist()),
+          FadeInWidget(delay: const Duration(milliseconds: 600), child: _buildUpcomingFasting()),
           const SizedBox(height: 20),
-          FadeInWidget(delay: const Duration(milliseconds: 700), child: _buildCommitmentStats()),
+          FadeInWidget(delay: const Duration(milliseconds: 700), child: _buildSpiritualChecklist()),
+          const SizedBox(height: 20),
+          FadeInWidget(delay: const Duration(milliseconds: 800), child: _buildCommitmentStats()),
           const SizedBox(height: 20),
           FadeInWidget(
-            delay: const Duration(milliseconds: 800),
+            delay: const Duration(milliseconds: 900),
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -247,7 +283,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildRamadanCountdown(),
+          FadeInWidget(delay: const Duration(milliseconds: 1000), child: _buildRamadanCountdown()),
           const SizedBox(height: 20),
           _buildQuickAction(context, 'وضع رمضان (إفطار، ختمة، أذكار)', Icons.star, Colors.indigo, destination: const RamadanView()),
           _buildQuickAction(context, 'الإحصائيات والتقدم', Icons.bar_chart, Colors.blue, destination: const StatsScreen()),
@@ -568,6 +604,39 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingFasting() {
+    final fasting = ref.watch(upcomingFastingProvider);
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.calendar_month, color: Colors.orange),
+                SizedBox(width: 10),
+                Text('أيام الصيام القادمة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 15),
+            ...fasting.map((day) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(day['type'] as String, style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text(day['hijri'] as String, style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                )),
           ],
         ),
       ),

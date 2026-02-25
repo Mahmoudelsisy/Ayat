@@ -21,6 +21,19 @@ class MushafView extends ConsumerStatefulWidget {
 
 class _MushafViewState extends ConsumerState<MushafView> {
   int _currentPageIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +43,7 @@ class _MushafViewState extends ConsumerState<MushafView> {
       data: (pages) => Stack(
         children: [
           PageView.builder(
+            controller: _pageController,
             reverse: true, // Mushaf is right to left
             itemCount: pages.length,
             onPageChanged: (index) => setState(() => _currentPageIndex = index),
@@ -51,20 +65,37 @@ class _MushafViewState extends ConsumerState<MushafView> {
           ),
           Positioned(
             bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
+            left: 20,
+            right: 20,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (pages.length > 1)
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Slider(
+                      value: _currentPageIndex.toDouble(),
+                      min: 0,
+                      max: (pages.length - 1).toDouble(),
+                      onChanged: (val) {
+                        _pageController.jumpToPage(val.toInt());
+                      },
+                      activeColor: Colors.green,
+                      inactiveColor: Colors.white24,
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'صفحة ${pages[_currentPageIndex]}',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                child: Text(
-                  'صفحة ${pages[_currentPageIndex]}',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
+              ],
             ),
           ),
         ],
