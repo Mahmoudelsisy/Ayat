@@ -10,6 +10,7 @@ import '../../audio/providers/audio_provider.dart';
 import '../../../core/services/audio_download_service.dart';
 import '../../../shared/providers/font_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
+import '../../../shared/providers/reading_theme_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/mushaf_view.dart';
 
@@ -289,6 +290,50 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
+  void _showThemeSelection() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final current = ref.watch(readingThemeProvider);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('سمة القراءة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.wb_sunny, color: Colors.orange),
+                title: const Text('أبيض'),
+                trailing: current == ReadingTheme.white ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () => _updateReadingTheme(ReadingTheme.white),
+              ),
+              ListTile(
+                leading: const Icon(Icons.book, color: Color(0xFF5B4636)),
+                title: const Text('ورقي (سيبيا)'),
+                trailing: current == ReadingTheme.sepia ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () => _updateReadingTheme(ReadingTheme.sepia),
+              ),
+              ListTile(
+                leading: const Icon(Icons.nightlight_round, color: Colors.blueGrey),
+                title: const Text('ليلي'),
+                trailing: current == ReadingTheme.night ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () => _updateReadingTheme(ReadingTheme.night),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _updateReadingTheme(ReadingTheme theme) {
+    ref.read(readingThemeProvider.notifier).state = theme;
+    ref.read(sharedPreferencesProvider).setString('reading_theme', theme.name);
+    Navigator.pop(context);
+  }
+
   void _showReciterSelection() {
     showModalBottomSheet(
       context: context,
@@ -328,11 +373,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     final selectedFont = ref.watch(selectedFontProvider);
     final quranFontSize = ref.watch(quranFontSizeProvider);
     final tafsirFontSize = ref.watch(tafsirFontSizeProvider);
+    final readingTheme = ref.watch(readingThemeProvider);
 
     return Scaffold(
+      backgroundColor: readingTheme.backgroundColor,
       appBar: AppBar(
         title: Text(widget.surahName),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.palette_outlined),
+            onPressed: _showThemeSelection,
+            tooltip: 'سمة القراءة',
+          ),
           IconButton(
             icon: Icon(_isParallelMode ? Icons.vertical_split : Icons.vertical_split_outlined),
             onPressed: () => setState(() => _isParallelMode = !_isParallelMode),
@@ -451,7 +503,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.share),
                                     onPressed: () {
-                                      Share.share('${ayah.verseText}\n[سورة ${ayah.surahNumber} - آية ${ayah.ayahNumber}]');
+                                      Share.share('﴿ ${ayah.verseText} ﴾\n\n[سورة ${widget.surahName} - آية ${ayah.ayahNumber}]\nتمت المشاركة من تطبيق آيات');
                                     },
                                   ),
                                   IconButton(
@@ -511,7 +563,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     Text(
                       ayah.verseText,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.getFont(selectedFont, fontSize: quranFontSize, height: 2),
+                      style: GoogleFonts.getFont(selectedFont,
+                          fontSize: quranFontSize, height: 2, color: readingTheme.textColor),
                     ),
                     if (_isParallelMode)
                       Consumer(builder: (context, ref, child) {

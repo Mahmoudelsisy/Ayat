@@ -8,6 +8,7 @@ import '../../../shared/providers/font_provider.dart';
 import '../../../shared/providers/reading_provider.dart';
 import '../../../core/services/data_download_service.dart';
 import '../../../core/services/backup_service.dart';
+import '../../audio/views/audio_manager_view.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
@@ -211,6 +212,12 @@ class SettingsView extends ConsumerWidget {
             title: const Text('صوت الأذان'),
             subtitle: Text(ref.watch(sharedPreferencesProvider).getString('muadhin') ?? 'الافتراضي'),
             onTap: () => _showMuadhinSelection(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.file_download),
+            title: const Text('إدارة التحميلات الصوتية'),
+            subtitle: const Text('عرض وحذف الملفات الصوتية المحملة'),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AudioManagerView())),
           ),
           SwitchListTile(
             secondary: const Icon(Icons.notifications),
