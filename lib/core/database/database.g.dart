@@ -87,6 +87,17 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _verseTextPlainMeta = const VerificationMeta(
+    'verseTextPlain',
+  );
+  @override
+  late final GeneratedColumn<String> verseTextPlain = GeneratedColumn<String>(
+    'verse_text_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _translationMeta = const VerificationMeta(
     'translation',
   );
@@ -119,6 +130,7 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     hizbNumber,
     pageNumber,
     verseText,
+    verseTextPlain,
     translation,
     reading,
   ];
@@ -182,6 +194,15 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
     } else if (isInserting) {
       context.missing(_verseTextMeta);
     }
+    if (data.containsKey('verse_text_plain')) {
+      context.handle(
+        _verseTextPlainMeta,
+        verseTextPlain.isAcceptableOrUnknown(
+          data['verse_text_plain']!,
+          _verseTextPlainMeta,
+        ),
+      );
+    }
     if (data.containsKey('translation')) {
       context.handle(
         _translationMeta,
@@ -234,6 +255,10 @@ class $QuranTable extends Quran with TableInfo<$QuranTable, QuranData> {
         DriftSqlType.string,
         data['${effectivePrefix}verse_text'],
       )!,
+      verseTextPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}verse_text_plain'],
+      ),
       translation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}translation'],
@@ -259,6 +284,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
   final int? hizbNumber;
   final int? pageNumber;
   final String verseText;
+  final String? verseTextPlain;
   final String? translation;
   final String reading;
   const QuranData({
@@ -269,6 +295,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     this.hizbNumber,
     this.pageNumber,
     required this.verseText,
+    this.verseTextPlain,
     this.translation,
     required this.reading,
   });
@@ -288,6 +315,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       map['page_number'] = Variable<int>(pageNumber);
     }
     map['verse_text'] = Variable<String>(verseText);
+    if (!nullToAbsent || verseTextPlain != null) {
+      map['verse_text_plain'] = Variable<String>(verseTextPlain);
+    }
     if (!nullToAbsent || translation != null) {
       map['translation'] = Variable<String>(translation);
     }
@@ -310,6 +340,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           ? const Value.absent()
           : Value(pageNumber),
       verseText: Value(verseText),
+      verseTextPlain: verseTextPlain == null && nullToAbsent
+          ? const Value.absent()
+          : Value(verseTextPlain),
       translation: translation == null && nullToAbsent
           ? const Value.absent()
           : Value(translation),
@@ -330,6 +363,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       hizbNumber: serializer.fromJson<int?>(json['hizbNumber']),
       pageNumber: serializer.fromJson<int?>(json['pageNumber']),
       verseText: serializer.fromJson<String>(json['verseText']),
+      verseTextPlain: serializer.fromJson<String?>(json['verseTextPlain']),
       translation: serializer.fromJson<String?>(json['translation']),
       reading: serializer.fromJson<String>(json['reading']),
     );
@@ -345,6 +379,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
       'hizbNumber': serializer.toJson<int?>(hizbNumber),
       'pageNumber': serializer.toJson<int?>(pageNumber),
       'verseText': serializer.toJson<String>(verseText),
+      'verseTextPlain': serializer.toJson<String?>(verseTextPlain),
       'translation': serializer.toJson<String?>(translation),
       'reading': serializer.toJson<String>(reading),
     };
@@ -358,6 +393,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     Value<int?> hizbNumber = const Value.absent(),
     Value<int?> pageNumber = const Value.absent(),
     String? verseText,
+    Value<String?> verseTextPlain = const Value.absent(),
     Value<String?> translation = const Value.absent(),
     String? reading,
   }) => QuranData(
@@ -368,6 +404,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     hizbNumber: hizbNumber.present ? hizbNumber.value : this.hizbNumber,
     pageNumber: pageNumber.present ? pageNumber.value : this.pageNumber,
     verseText: verseText ?? this.verseText,
+    verseTextPlain: verseTextPlain.present
+        ? verseTextPlain.value
+        : this.verseTextPlain,
     translation: translation.present ? translation.value : this.translation,
     reading: reading ?? this.reading,
   );
@@ -388,6 +427,9 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           ? data.pageNumber.value
           : this.pageNumber,
       verseText: data.verseText.present ? data.verseText.value : this.verseText,
+      verseTextPlain: data.verseTextPlain.present
+          ? data.verseTextPlain.value
+          : this.verseTextPlain,
       translation: data.translation.present
           ? data.translation.value
           : this.translation,
@@ -405,6 +447,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           ..write('hizbNumber: $hizbNumber, ')
           ..write('pageNumber: $pageNumber, ')
           ..write('verseText: $verseText, ')
+          ..write('verseTextPlain: $verseTextPlain, ')
           ..write('translation: $translation, ')
           ..write('reading: $reading')
           ..write(')'))
@@ -420,6 +463,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
     hizbNumber,
     pageNumber,
     verseText,
+    verseTextPlain,
     translation,
     reading,
   );
@@ -434,6 +478,7 @@ class QuranData extends DataClass implements Insertable<QuranData> {
           other.hizbNumber == this.hizbNumber &&
           other.pageNumber == this.pageNumber &&
           other.verseText == this.verseText &&
+          other.verseTextPlain == this.verseTextPlain &&
           other.translation == this.translation &&
           other.reading == this.reading);
 }
@@ -446,6 +491,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
   final Value<int?> hizbNumber;
   final Value<int?> pageNumber;
   final Value<String> verseText;
+  final Value<String?> verseTextPlain;
   final Value<String?> translation;
   final Value<String> reading;
   const QuranCompanion({
@@ -456,6 +502,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     this.hizbNumber = const Value.absent(),
     this.pageNumber = const Value.absent(),
     this.verseText = const Value.absent(),
+    this.verseTextPlain = const Value.absent(),
     this.translation = const Value.absent(),
     this.reading = const Value.absent(),
   });
@@ -467,6 +514,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     this.hizbNumber = const Value.absent(),
     this.pageNumber = const Value.absent(),
     required String verseText,
+    this.verseTextPlain = const Value.absent(),
     this.translation = const Value.absent(),
     this.reading = const Value.absent(),
   }) : surahNumber = Value(surahNumber),
@@ -480,6 +528,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Expression<int>? hizbNumber,
     Expression<int>? pageNumber,
     Expression<String>? verseText,
+    Expression<String>? verseTextPlain,
     Expression<String>? translation,
     Expression<String>? reading,
   }) {
@@ -491,6 +540,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
       if (hizbNumber != null) 'hizb_number': hizbNumber,
       if (pageNumber != null) 'page_number': pageNumber,
       if (verseText != null) 'verse_text': verseText,
+      if (verseTextPlain != null) 'verse_text_plain': verseTextPlain,
       if (translation != null) 'translation': translation,
       if (reading != null) 'reading': reading,
     });
@@ -504,6 +554,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     Value<int?>? hizbNumber,
     Value<int?>? pageNumber,
     Value<String>? verseText,
+    Value<String?>? verseTextPlain,
     Value<String?>? translation,
     Value<String>? reading,
   }) {
@@ -515,6 +566,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
       hizbNumber: hizbNumber ?? this.hizbNumber,
       pageNumber: pageNumber ?? this.pageNumber,
       verseText: verseText ?? this.verseText,
+      verseTextPlain: verseTextPlain ?? this.verseTextPlain,
       translation: translation ?? this.translation,
       reading: reading ?? this.reading,
     );
@@ -544,6 +596,9 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
     if (verseText.present) {
       map['verse_text'] = Variable<String>(verseText.value);
     }
+    if (verseTextPlain.present) {
+      map['verse_text_plain'] = Variable<String>(verseTextPlain.value);
+    }
     if (translation.present) {
       map['translation'] = Variable<String>(translation.value);
     }
@@ -563,6 +618,7 @@ class QuranCompanion extends UpdateCompanion<QuranData> {
           ..write('hizbNumber: $hizbNumber, ')
           ..write('pageNumber: $pageNumber, ')
           ..write('verseText: $verseText, ')
+          ..write('verseTextPlain: $verseTextPlain, ')
           ..write('translation: $translation, ')
           ..write('reading: $reading')
           ..write(')'))
@@ -1970,6 +2026,17 @@ class $AllahNamesTable extends AllahNames
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _namePlainMeta = const VerificationMeta(
+    'namePlain',
+  );
+  @override
+  late final GeneratedColumn<String> namePlain = GeneratedColumn<String>(
+    'name_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _meaningMeta = const VerificationMeta(
     'meaning',
   );
@@ -1982,7 +2049,7 @@ class $AllahNamesTable extends AllahNames
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, meaning];
+  List<GeneratedColumn> get $columns => [id, name, namePlain, meaning];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2005,6 +2072,12 @@ class $AllahNamesTable extends AllahNames
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('name_plain')) {
+      context.handle(
+        _namePlainMeta,
+        namePlain.isAcceptableOrUnknown(data['name_plain']!, _namePlainMeta),
+      );
     }
     if (data.containsKey('meaning')) {
       context.handle(
@@ -2031,6 +2104,10 @@ class $AllahNamesTable extends AllahNames
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      namePlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_plain'],
+      ),
       meaning: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}meaning'],
@@ -2047,10 +2124,12 @@ class $AllahNamesTable extends AllahNames
 class AllahName extends DataClass implements Insertable<AllahName> {
   final int id;
   final String name;
+  final String? namePlain;
   final String meaning;
   const AllahName({
     required this.id,
     required this.name,
+    this.namePlain,
     required this.meaning,
   });
   @override
@@ -2058,6 +2137,9 @@ class AllahName extends DataClass implements Insertable<AllahName> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || namePlain != null) {
+      map['name_plain'] = Variable<String>(namePlain);
+    }
     map['meaning'] = Variable<String>(meaning);
     return map;
   }
@@ -2066,6 +2148,9 @@ class AllahName extends DataClass implements Insertable<AllahName> {
     return AllahNamesCompanion(
       id: Value(id),
       name: Value(name),
+      namePlain: namePlain == null && nullToAbsent
+          ? const Value.absent()
+          : Value(namePlain),
       meaning: Value(meaning),
     );
   }
@@ -2078,6 +2163,7 @@ class AllahName extends DataClass implements Insertable<AllahName> {
     return AllahName(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      namePlain: serializer.fromJson<String?>(json['namePlain']),
       meaning: serializer.fromJson<String>(json['meaning']),
     );
   }
@@ -2087,19 +2173,27 @@ class AllahName extends DataClass implements Insertable<AllahName> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'namePlain': serializer.toJson<String?>(namePlain),
       'meaning': serializer.toJson<String>(meaning),
     };
   }
 
-  AllahName copyWith({int? id, String? name, String? meaning}) => AllahName(
+  AllahName copyWith({
+    int? id,
+    String? name,
+    Value<String?> namePlain = const Value.absent(),
+    String? meaning,
+  }) => AllahName(
     id: id ?? this.id,
     name: name ?? this.name,
+    namePlain: namePlain.present ? namePlain.value : this.namePlain,
     meaning: meaning ?? this.meaning,
   );
   AllahName copyWithCompanion(AllahNamesCompanion data) {
     return AllahName(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      namePlain: data.namePlain.present ? data.namePlain.value : this.namePlain,
       meaning: data.meaning.present ? data.meaning.value : this.meaning,
     );
   }
@@ -2109,45 +2203,52 @@ class AllahName extends DataClass implements Insertable<AllahName> {
     return (StringBuffer('AllahName(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('namePlain: $namePlain, ')
           ..write('meaning: $meaning')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, meaning);
+  int get hashCode => Object.hash(id, name, namePlain, meaning);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AllahName &&
           other.id == this.id &&
           other.name == this.name &&
+          other.namePlain == this.namePlain &&
           other.meaning == this.meaning);
 }
 
 class AllahNamesCompanion extends UpdateCompanion<AllahName> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String?> namePlain;
   final Value<String> meaning;
   const AllahNamesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.namePlain = const Value.absent(),
     this.meaning = const Value.absent(),
   });
   AllahNamesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    this.namePlain = const Value.absent(),
     required String meaning,
   }) : name = Value(name),
        meaning = Value(meaning);
   static Insertable<AllahName> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? namePlain,
     Expression<String>? meaning,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (namePlain != null) 'name_plain': namePlain,
       if (meaning != null) 'meaning': meaning,
     });
   }
@@ -2155,11 +2256,13 @@ class AllahNamesCompanion extends UpdateCompanion<AllahName> {
   AllahNamesCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
+    Value<String?>? namePlain,
     Value<String>? meaning,
   }) {
     return AllahNamesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      namePlain: namePlain ?? this.namePlain,
       meaning: meaning ?? this.meaning,
     );
   }
@@ -2173,6 +2276,9 @@ class AllahNamesCompanion extends UpdateCompanion<AllahName> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (namePlain.present) {
+      map['name_plain'] = Variable<String>(namePlain.value);
+    }
     if (meaning.present) {
       map['meaning'] = Variable<String>(meaning.value);
     }
@@ -2184,6 +2290,7 @@ class AllahNamesCompanion extends UpdateCompanion<AllahName> {
     return (StringBuffer('AllahNamesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('namePlain: $namePlain, ')
           ..write('meaning: $meaning')
           ..write(')'))
         .toString();
@@ -4256,6 +4363,7 @@ typedef $$QuranTableCreateCompanionBuilder =
       Value<int?> hizbNumber,
       Value<int?> pageNumber,
       required String verseText,
+      Value<String?> verseTextPlain,
       Value<String?> translation,
       Value<String> reading,
     });
@@ -4268,6 +4376,7 @@ typedef $$QuranTableUpdateCompanionBuilder =
       Value<int?> hizbNumber,
       Value<int?> pageNumber,
       Value<String> verseText,
+      Value<String?> verseTextPlain,
       Value<String?> translation,
       Value<String> reading,
     });
@@ -4312,6 +4421,11 @@ class $$QuranTableFilterComposer extends Composer<_$AppDatabase, $QuranTable> {
 
   ColumnFilters<String> get verseText => $composableBuilder(
     column: $table.verseText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get verseTextPlain => $composableBuilder(
+    column: $table.verseTextPlain,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4370,6 +4484,11 @@ class $$QuranTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get verseTextPlain => $composableBuilder(
+    column: $table.verseTextPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get translation => $composableBuilder(
     column: $table.translation,
     builder: (column) => ColumnOrderings(column),
@@ -4419,6 +4538,11 @@ class $$QuranTableAnnotationComposer
   GeneratedColumn<String> get verseText =>
       $composableBuilder(column: $table.verseText, builder: (column) => column);
 
+  GeneratedColumn<String> get verseTextPlain => $composableBuilder(
+    column: $table.verseTextPlain,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get translation => $composableBuilder(
     column: $table.translation,
     builder: (column) => column,
@@ -4463,6 +4587,7 @@ class $$QuranTableTableManager
                 Value<int?> hizbNumber = const Value.absent(),
                 Value<int?> pageNumber = const Value.absent(),
                 Value<String> verseText = const Value.absent(),
+                Value<String?> verseTextPlain = const Value.absent(),
                 Value<String?> translation = const Value.absent(),
                 Value<String> reading = const Value.absent(),
               }) => QuranCompanion(
@@ -4473,6 +4598,7 @@ class $$QuranTableTableManager
                 hizbNumber: hizbNumber,
                 pageNumber: pageNumber,
                 verseText: verseText,
+                verseTextPlain: verseTextPlain,
                 translation: translation,
                 reading: reading,
               ),
@@ -4485,6 +4611,7 @@ class $$QuranTableTableManager
                 Value<int?> hizbNumber = const Value.absent(),
                 Value<int?> pageNumber = const Value.absent(),
                 required String verseText,
+                Value<String?> verseTextPlain = const Value.absent(),
                 Value<String?> translation = const Value.absent(),
                 Value<String> reading = const Value.absent(),
               }) => QuranCompanion.insert(
@@ -4495,6 +4622,7 @@ class $$QuranTableTableManager
                 hizbNumber: hizbNumber,
                 pageNumber: pageNumber,
                 verseText: verseText,
+                verseTextPlain: verseTextPlain,
                 translation: translation,
                 reading: reading,
               ),
@@ -5276,12 +5404,14 @@ typedef $$AllahNamesTableCreateCompanionBuilder =
     AllahNamesCompanion Function({
       Value<int> id,
       required String name,
+      Value<String?> namePlain,
       required String meaning,
     });
 typedef $$AllahNamesTableUpdateCompanionBuilder =
     AllahNamesCompanion Function({
       Value<int> id,
       Value<String> name,
+      Value<String?> namePlain,
       Value<String> meaning,
     });
 
@@ -5301,6 +5431,11 @@ class $$AllahNamesTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get namePlain => $composableBuilder(
+    column: $table.namePlain,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5329,6 +5464,11 @@ class $$AllahNamesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get namePlain => $composableBuilder(
+    column: $table.namePlain,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get meaning => $composableBuilder(
     column: $table.meaning,
     builder: (column) => ColumnOrderings(column),
@@ -5349,6 +5489,9 @@ class $$AllahNamesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get namePlain =>
+      $composableBuilder(column: $table.namePlain, builder: (column) => column);
 
   GeneratedColumn<String> get meaning =>
       $composableBuilder(column: $table.meaning, builder: (column) => column);
@@ -5387,16 +5530,24 @@ class $$AllahNamesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> namePlain = const Value.absent(),
                 Value<String> meaning = const Value.absent(),
-              }) => AllahNamesCompanion(id: id, name: name, meaning: meaning),
+              }) => AllahNamesCompanion(
+                id: id,
+                name: name,
+                namePlain: namePlain,
+                meaning: meaning,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
+                Value<String?> namePlain = const Value.absent(),
                 required String meaning,
               }) => AllahNamesCompanion.insert(
                 id: id,
                 name: name,
+                namePlain: namePlain,
                 meaning: meaning,
               ),
           withReferenceMapper: (p0) => p0

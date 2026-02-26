@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../main.dart';
 import '../../../core/database/database.dart';
+import '../../../core/utils/arabic_utils.dart';
 
 final allahNamesProvider = FutureProvider<List<AllahName>>((ref) async {
   final db = ref.read(databaseProvider);
@@ -44,7 +45,13 @@ class _AllahNamesScreenState extends ConsumerState<AllahNamesScreen> {
       ),
       body: namesAsync.when(
         data: (names) {
-          final filtered = names.where((n) => n.name.contains(_searchQuery) || n.meaning.contains(_searchQuery)).toList();
+          final normalizedQuery = ArabicUtils.normalize(_searchQuery);
+          final filtered = names.where((n) {
+            final matchName = n.name.contains(_searchQuery);
+            final matchPlain = n.namePlain?.contains(normalizedQuery) ?? false;
+            final matchMeaning = n.meaning.contains(_searchQuery);
+            return matchName || matchPlain || matchMeaning;
+          }).toList();
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

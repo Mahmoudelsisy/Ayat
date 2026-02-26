@@ -16,6 +16,7 @@ class Quran extends Table {
   IntColumn get hizbNumber => integer().nullable()();
   IntColumn get pageNumber => integer().nullable()();
   TextColumn get verseText => text()();
+  TextColumn get verseTextPlain => text().nullable()();
   TextColumn get translation => text().nullable()();
   TextColumn get reading => text().withDefault(const Constant('hafs'))();
 }
@@ -54,6 +55,7 @@ class Bookmarks extends Table {
 class AllahNames extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
+  TextColumn get namePlain => text().nullable()();
   TextColumn get meaning => text()();
 }
 
@@ -119,7 +121,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -137,6 +139,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 4) {
             await m.addColumn(dailyCommitment, dailyCommitment.jamaahPrayers);
             await m.addColumn(dailyCommitment, dailyCommitment.sunnahPrayers);
+          }
+          if (from < 5) {
+            await m.addColumn(quran, quran.verseTextPlain);
+            await m.addColumn(allahNames, allahNames.namePlain);
           }
         },
       );

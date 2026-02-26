@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../database/database.dart';
 import 'package:drift/drift.dart';
+import '../utils/arabic_utils.dart';
 
 class DataDownloadService {
   final AppDatabase db;
@@ -47,6 +48,7 @@ class DataDownloadService {
                 hizbNumber: Value(ayah['hizbQuarter'] as int),
                 pageNumber: Value(ayah['page'] as int),
                 verseText: ayah['text'] as String,
+                verseTextPlain: Value(ArabicUtils.normalize(ayah['text'] as String)),
                 reading: Value(edition),
               )
           ]);
@@ -96,6 +98,7 @@ class DataDownloadService {
           for (var item in data)
             AllahNamesCompanion.insert(
               name: item['name'] as String,
+              namePlain: Value(ArabicUtils.normalize(item['name'] as String)),
               meaning: item['text'] as String,
             )
         ]);

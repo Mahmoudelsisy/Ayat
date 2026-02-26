@@ -4,6 +4,7 @@ import '../../../main.dart';
 import '../../../core/database/database.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../quran/views/surah_detail_screen.dart';
+import '../../../core/utils/arabic_utils.dart';
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({super.key});
@@ -31,8 +32,11 @@ class _SearchViewState extends ConsumerState<SearchView> {
 
     final db = ref.read(databaseProvider);
 
-    // Search Quran
-    final quranQuery = db.select(db.quran)..where((t) => t.verseText.like('%$query%'))..limit(50);
+    // Search Quran (Smart search with normalization)
+    final normalizedQuery = ArabicUtils.normalize(query);
+    final quranQuery = db.select(db.quran)
+      ..where((t) => t.verseText.like('%$query%') | t.verseTextPlain.like('%$normalizedQuery%'))
+      ..limit(50);
     final quranResults = await quranQuery.get();
 
     // Search Tafsir

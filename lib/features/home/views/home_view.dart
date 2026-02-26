@@ -15,6 +15,8 @@ import '../../prayer_times/views/travel_mode_screen.dart';
 import '../../audio/views/audio_comparison_screen.dart';
 import 'allah_names_screen.dart';
 import 'khatma_planner_screen.dart';
+import 'zakat_calculator_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../stats/views/achievements_screen.dart';
 import '../../azkar/views/ruqyah_screen.dart';
 import '../../modes/views/ramadan_view.dart';
@@ -307,6 +309,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
           _buildQuickAction(context, 'الأوضاع الخاصة (قيام، خلوة)', Icons.brightness_4, Colors.purple, destination: const ModesScreen()),
           _buildQuickAction(context, 'أذكار الصباح', Icons.wb_sunny, Colors.orange),
           _buildQuickAction(context, 'أذكار المساء', Icons.nightlight_round, Colors.indigo),
+          _buildQuickAction(context, 'حاسبة الزكاة', Icons.calculate, Colors.amber, destination: const ZakatCalculatorScreen()),
+          _buildQuickAction(context, 'البحث عن مساجد', Icons.map, Colors.green, onTap: _openMosqueFinder),
           _buildQuickAction(context, 'الرقية الشرعية', Icons.security, Colors.teal, destination: const RuqyahScreen()),
           _buildQuickAction(context, 'سورة الكهف', Icons.menu_book, Colors.green),
         ],
@@ -795,14 +799,25 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildQuickAction(BuildContext context, String title, IconData icon, Color color, {Widget? destination}) {
+  Future<void> _openMosqueFinder() async {
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=mosque');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذر فتح الخرائط')));
+      }
+    }
+  }
+
+  Widget _buildQuickAction(BuildContext context, String title, IconData icon, Color color, {Widget? destination, VoidCallback? onTap}) {
     return Card(
       child: ListTile(
         leading: Icon(icon, color: color),
         title: Text(title),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
-          if (destination != null) {
+          if (onTap != null) {
+            onTap();
+          } else if (destination != null) {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => destination));
           }
         },
