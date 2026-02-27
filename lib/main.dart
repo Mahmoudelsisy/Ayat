@@ -1,0 +1,205 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'shared/themes/app_theme.dart';
+import 'core/database/database.dart';
+import 'dart:math';
+import 'core/services/data_download_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/auth_service.dart';
+import 'features/home/views/main_screen.dart';
+
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(() => db.close());
+  return db;
+});
+
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
+  final sharedPrefs = await SharedPreferences.getInstance();
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+      ],
+      child: const AyatApp(),
+    ),
+  );
+}
+
+class AyatApp extends ConsumerWidget {
+  const AyatApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final themeColor = ref.watch(themeColorProvider);
+
+    return MaterialApp(
+      title: 'Ayat | آيات',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme(themeColor),
+      darkTheme: AppTheme.darkTheme(themeColor),
+      themeMode: themeMode,
+      locale: const Locale('ar'),
+      supportedLocales: const [
+        Locale('ar'),
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: const SplashScreen(),
+    );
+  }
+}
+
+final downloadProgressProvider = StateProvider<double>((ref) => 0.0);
+final isDownloadingProvider = StateProvider<bool>((ref) => false);
+final isAppLockedProvider = StateProvider<bool>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return prefs.getBool('is_locked') ?? false;
+});
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final isDark = prefs.getBool('is_dark') ?? false;
+  return isDark ? ThemeMode.dark : ThemeMode.light;
+});
+
+final themeColorProvider = StateProvider<Color>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final colorValue = prefs.getInt('theme_color') ?? AppTheme.islamicGreen.toARGB32();
+  return Color(colorValue);
+});
+
+class SplashScreen extends ConsumerStatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkData();
+  }
+
+  bool _isAuthenticating = false;
+
+  Future<void> _checkData() async {
+    // Auth Check
+    final isLocked = ref.read(isAppLockedProvider);
+    if (isLocked) {
+      setState(() => _isAuthenticating = true);
+      final authService = ref.read(authServiceProvider);
+      final authenticated = await authService.authenticate();
+      setState(() => _isAuthenticating = false);
+      if (!authenticated) {
+        // App remains locked
+        return;
+      }
+    }
+
+    final db = ref.read(databaseProvider);
+    final quranCount = await (db.select(db.quran)..limit(1)).get();
+
+    if (quranCount.isEmpty) {
+      if (mounted) {
+        ref.read(isDownloadingProvider.notifier).state = true;
+        final service = DataDownloadService(db);
+        await service.downloadAllData((progress) {
+          if (mounted) {
+            ref.read(downloadProgressProvider.notifier).state = progress;
+          }
+        });
+        if (mounted) {
+          ref.read(isDownloadingProvider.notifier).state = false;
+        }
+      }
+    }
+
+    if (mounted) {
+      _scheduleDailyReminders();
+      // Navigate to Home
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  }
+
+  Future<void> _scheduleDailyReminders() async {
+    final db = ref.read(databaseProvider);
+    final azkar = await (db.select(db.azkar)..limit(100)).get();
+    if (azkar.isNotEmpty) {
+      final randomZikr = azkar[Random().nextInt(azkar.length)];
+      NotificationService().scheduleDailyNotification(
+        1001,
+        'ذكر اليوم',
+        randomZikr.zikrText,
+        8, // 8 AM
+        30,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = ref.watch(downloadProgressProvider);
+    final isDownloading = ref.watch(isDownloadingProvider);
+
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/Logo.png', width: 150),
+            const SizedBox(height: 20),
+            const Text(
+              'آيات',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.islamicGreen,
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (isDownloading) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: LinearProgressIndicator(value: progress),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'جاري تحميل البيانات... ${(progress * 100).toInt()}%',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ] else if (_isAuthenticating) ...[
+              const CircularProgressIndicator(),
+              const SizedBox(height: 10),
+              const Text('يرجى تأكيد الهوية...'),
+            ] else ...[
+              const CircularProgressIndicator(),
+              if (ref.watch(isAppLockedProvider)) ...[
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _checkData,
+                  child: const Text('إعادة المحاولة'),
+                ),
+              ]
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
